@@ -54,3 +54,16 @@ type Power struct {
 	Position
 	kind powerType
 }
+
+func NewGhost(x, y int, kind ghostType, dir direction) Ghost {
+	return Ghost{
+		Position{
+			cellX:     x,
+			cellY:     y,
+			posX:      float64((x * 32) + 16),
+			posY:      float64((y * 32) + 16),
+			direction: dir,
+		},
+		kind,
+	}
+}

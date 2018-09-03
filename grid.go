@@ -27,6 +27,26 @@ func GridView(
 		return nil, pacmanErr
 	}
 
+	ghost1, ghost1Err := ScaleSprite(characters.Ghost1, 0.27, 0.27)
+	if ghost1Err != nil {
+		return nil, ghost1Err
+	}
+
+	ghost2, ghost2Err := ScaleSprite(characters.Ghost2, 0.27, 0.27)
+	if ghost2Err != nil {
+		return nil, ghost2Err
+	}
+
+	ghost3, ghost3Err := ScaleSprite(characters.Ghost3, 0.27, 0.27)
+	if ghost3Err != nil {
+		return nil, ghost3Err
+	}
+
+	ghost4, ghost4Err := ScaleSprite(characters.Ghost4, 0.27, 0.27)
+	if ghost4Err != nil {
+		return nil, ghost4Err
+	}
+
 	view, viewErr := ebiten.NewImage(32*Columns, 512, ebiten.FilterDefault)
 	if viewErr != nil {
 		return nil, viewErr
@@ -82,6 +102,27 @@ func GridView(
 			}
 			if drawErr := view.DrawImage(pacman, ops); drawErr != nil {
 				return nil, drawErr
+			}
+
+			for i := 0; i < len(data.ghosts); i++ {
+				ghost := data.ghosts[i]
+				ghostImg := ghost1
+				switch ghost.kind {
+				case Ghost2:
+					ghostImg = ghost2
+				case Ghost3:
+					ghostImg = ghost3
+				case Ghost4:
+					ghostImg = ghost4
+				}
+				gwidth, gheight := ghostImg.Size()
+				ops.GeoM.Reset()
+				ops.GeoM.Translate(
+					data.ghosts[i].posX-float64(gwidth/2),
+					512-(data.ghosts[i].posY-float64(gheight+(gheight/2))))
+				if drawErr := view.DrawImage(ghostImg, ops); drawErr != nil {
+					return nil, drawErr
+				}
 			}
 
 			if state == GamePause {

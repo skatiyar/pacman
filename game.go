@@ -95,10 +95,25 @@ func (g *Game) Update(screen *ebiten.Image) error {
 					cellY:     0,
 					posX:      float64((xcol * 32) + 16),
 					posY:      16,
-					direction: West,
+					direction: getDirection(g.data.grid[0][xcol].Walls()),
 				},
 			}
 			g.data.grid[0][xcol].active = true
+			ghosts := make([]Ghost, 0)
+			for i := 1; i < 8; i++ {
+				cellX := g.rand.Intn(Columns)
+				cellY := g.rand.Intn(2) + (2 * i)
+				kind := Ghost1
+				if i%4 == 0 {
+					kind = Ghost4
+				} else if i%3 == 0 {
+					kind = Ghost3
+				} else if i%2 == 0 {
+					kind = Ghost2
+				}
+				ghosts = append(ghosts, NewGhost(cellX, cellY, kind, North))
+			}
+			g.data.ghosts = ghosts
 			g.state = GameStart
 		} else {
 			g.data = nil
@@ -340,4 +355,20 @@ func canPacmanMove(posX, posY float64, x, y int, walls [4]rune) bool {
 	}
 
 	return true
+}
+
+func getDirection(walls [4]rune) direction {
+	if walls[0] != 'N' {
+		return North
+	}
+	if walls[1] != 'E' {
+		return East
+	}
+	if walls[2] != 'S' {
+		return South
+	}
+	if walls[3] != 'W' {
+		return West
+	}
+	return North
 }
