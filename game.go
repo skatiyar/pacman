@@ -21,6 +21,7 @@ type Game struct {
 	keys     struct {
 		up, left, down, right bool
 	}
+	direction direction
 }
 
 const (
@@ -72,10 +73,11 @@ func NewGame() (*Game, error) {
 	}
 
 	return &Game{
-		rand:     rand.New(rand.NewSource(time.Now().UnixNano())),
-		state:    GameLoading,
-		skinView: skinView,
-		gridView: gridView,
+		rand:      rand.New(rand.NewSource(time.Now().UnixNano())),
+		state:     GameLoading,
+		skinView:  skinView,
+		gridView:  gridView,
+		direction: None,
 	}, nil
 }
 
@@ -122,15 +124,23 @@ func (g *Game) Update(screen *ebiten.Image) error {
 	case GameStart:
 		if spaceReleased() {
 			g.state = GamePause
+			return nil
 		}
 		if g.data.pacman.cellY == len(g.data.grid)-8 {
 			g.sindex += 4
 			if g.sindex > (g.maze.Rows() - MazeViewSize/32) {
 				g.maze.GrowBy(16)
 			}
+			for i := 0; i < len(g.data.ghosts); i++ {
+				if g.data.ghosts[i].cellY < g.sindex {
+					g.data.ghosts = append(g.data.ghosts[:i], g.data.ghosts[i+1:]...)
+				} else {
+					g.data.ghosts[i].cellY -= 4
+				}
+			}
 			g.data.grid = g.maze.Get(g.sindex, g.sindex+(MazeViewSize/32))
-			g.data.pacman.cellY = g.data.pacman.cellY - 4
-			g.data.gridOffsetY = g.data.gridOffsetY - 128
+			g.data.pacman.cellY -= 4
+			g.data.gridOffsetY -= 128
 		}
 
 		speed := 1.5
@@ -149,7 +159,8 @@ func (g *Game) Update(screen *ebiten.Image) error {
 			}
 		}
 
-		if g.keys.up {
+		switch g.direction {
+		case North:
 			if g.data.pacman.direction != North {
 				g.data.pacman.direction = North
 			} else {
@@ -162,6 +173,9 @@ func (g *Game) Update(screen *ebiten.Image) error {
 				) {
 					if g.data.pacman.posY > 320 {
 						g.data.gridOffsetY += speed
+						for i := 0; i < len(g.data.ghosts); i++ {
+							g.data.ghosts[i].posY -= speed
+						}
 					} else {
 						g.data.pacman.posY += speed
 					}
@@ -170,8 +184,31 @@ func (g *Game) Update(screen *ebiten.Image) error {
 					g.data.pacman.cellY += 1
 				}
 			}
-		}
-		if g.keys.right {
+		case South:
+			if g.data.pacman.direction != South {
+				g.data.pacman.direction = South
+			} else {
+				if canPacmanMove(
+					g.data.pacman.posX,
+					g.data.pacman.posY+g.data.gridOffsetY-speed,
+					g.data.pacman.cellX,
+					g.data.pacman.cellY,
+					g.data.grid[ycell][xcell].walls,
+				) {
+					if g.data.pacman.posY > 320 && g.data.gridOffsetY > 0 {
+						g.data.gridOffsetY -= speed
+						for i := 0; i < len(g.data.ghosts); i++ {
+							g.data.ghosts[i].posY += speed
+						}
+					} else {
+						g.data.pacman.posY -= speed
+					}
+				}
+				if g.data.pacman.posY+g.data.gridOffsetY-8 < float64(ycell*32) {
+					g.data.pacman.cellY -= 1
+				}
+			}
+		case East:
 			if g.data.pacman.direction != East {
 				g.data.pacman.direction = East
 			} else {
@@ -188,30 +225,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 					g.data.pacman.cellX += 1
 				}
 			}
-		}
-		if g.keys.down {
-			if g.data.pacman.direction != South {
-				g.data.pacman.direction = South
-			} else {
-				if canPacmanMove(
-					g.data.pacman.posX,
-					g.data.pacman.posY+g.data.gridOffsetY-speed,
-					g.data.pacman.cellX,
-					g.data.pacman.cellY,
-					g.data.grid[ycell][xcell].walls,
-				) {
-					if g.data.pacman.posY > 320 && g.data.gridOffsetY > 0 {
-						g.data.gridOffsetY -= speed
-					} else {
-						g.data.pacman.posY -= speed
-					}
-				}
-				if g.data.pacman.posY+g.data.gridOffsetY-8 < float64(ycell*32) {
-					g.data.pacman.cellY -= 1
-				}
-			}
-		}
-		if g.keys.left {
+		case West:
 			if g.data.pacman.direction != West {
 				g.data.pacman.direction = West
 			} else {
@@ -280,28 +294,16 @@ func (g *Game) Run() error {
 
 func (g *Game) keybord() {
 	if upKeyPressed() {
-		g.keys.up = true
-	}
-	if upKeyReleased() {
-		g.keys.up = false
+		g.direction = North
 	}
 	if downKeyPressed() {
-		g.keys.down = true
-	}
-	if downKeyReleased() {
-		g.keys.down = false
+		g.direction = South
 	}
 	if leftKeyPressed() {
-		g.keys.left = true
-	}
-	if leftKeyReleased() {
-		g.keys.left = false
+		g.direction = West
 	}
 	if rightKeyPressed() {
-		g.keys.right = true
-	}
-	if rightKeyReleased() {
-		g.keys.right = false
+		g.direction = East
 	}
 }
 

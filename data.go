@@ -18,6 +18,7 @@ const (
 	East
 	South
 	West
+	None
 
 	Ghost1 ghostType = iota
 	Ghost2
