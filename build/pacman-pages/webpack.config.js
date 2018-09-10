@@ -29,7 +29,8 @@ var config = {
     }),
     new HtmlWebpackPlugin({
       title: 'Pacman',
-      template: 'index.html'
+      template: 'index.html',
+      favicon: 'pacman.ico'
     }),
     new HtmlWebpackPlugin({
       title: 'Pacman game view',
