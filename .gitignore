@@ -14,3 +14,5 @@
 # Mac
 .DS_Store
 *.swp
+
+vendor
