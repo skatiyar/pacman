@@ -13,6 +13,9 @@
 
 # Mac
 .DS_Store
+
+# Vim
 *.swp
 
+# Don't commit vendor dir
 vendor
