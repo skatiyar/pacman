@@ -1,0 +1,191 @@
+body {
+  font-family: Helvetica, Arial, sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  padding: 0px;
+  margin: 0px;
+  height: 100%;
+  width: 100%;
+}
+
+a { display: inline-block; }
+p { padding: 0; margin: 0; }
+ul, li { list-style: none; }
+h1, h2, h3, h4, h5, h6 {
+  padding: 0;
+  margin: 0;
+}
+
+iframe {
+  border: 0px;
+}
+
+.hide { display: none; }
+.center { text-align: center; }
+.left { text-align: left; }
+.invisible { visibility: hidden; }
+.disable {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.5;
+}
+
+.Logo {
+  &__Big {
+    width: 80px;
+    height: 80px;
+  }
+
+  &__Small {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+.Icon {
+  &__Big {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.Spacing {
+  &__80 { margin-bottom: 80px !important; }
+  &__50 { margin-bottom: 50px !important; }
+  &__40 { margin-bottom: 40px !important; }
+  &__30 { margin-bottom: 30px !important; }
+  &__20 { margin-bottom: 20px !important; }
+  &__10 { margin-bottom: 10px !important; }
+}
+
+.Heading {
+  &__Tagline {
+    font-size: 35px;
+    line-height: 1.14;
+    font-weight: 800;
+  }
+  &__Success {
+    font-size: 20px;
+    line-height: 1.14;
+    font-weight: 800;
+    color: #27ae60;
+  }
+
+  &__Error {
+    font-size: 20px;
+    line-height: 1.14;
+    font-weight: 800;
+    color: #e74c3c;
+  }
+
+  &__Info {
+    font-size: 16px;
+    font-weight: 400;
+    color: #808080;
+  }
+}
+
+.Text {
+  &__Message {
+    color: #808080;
+  }
+  &__Error {
+    color: #e74c3c;
+  }
+}
+
+.Input {
+  outline: none;
+  font-size: 16px;
+  border-radius: 3px;
+  border-color: #27ae60;
+  border: 1px solid;
+  height: 45px;
+  padding: 12px 20px;
+
+  &__Label {
+    font-size: 16px;
+    font-weight: 700;
+  }
+}
+.Input:hover, .Input:focus {
+  border-color: #27ae60;
+}
+
+
+/* separator  */
+.Separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &__Line {
+    width: 200px;
+    border-bottom: 1px solid #eee;
+    height: 0px;
+  }
+
+  .Separator__Text {
+    padding: 0 20px;
+    color: #808080;
+    font-weight: 700;
+    font-size: 13px;
+  }
+}
+
+
+
+.Spinner {
+  margin: 100px auto 0;
+  width: 200px;
+  text-align: center;
+
+  .label__big {
+    margin-top: 5px;
+    color:#808080;
+    font-size: 16px;
+    font-weight: 700;
+    font-family:"acumin-pro", sans-serif;
+    margin-bottom: 5px;
+  }
+  .label__small {
+    color:#808080;
+    font-size: 12px;
+    font-family:"acumin-pro", sans-serif;
+    margin-top: 5px;
+  }
+  .bounce1 {
+    -webkit-animation-delay: -0.32s;
+    animation-delay: -0.32s;
+  }
+  .bounce2 {
+    -webkit-animation-delay: -0.16s;
+    animation-delay: -0.16s;
+  }
+}
+
+.Spinner > div {
+  width: 18px;
+  height: 18px;
+  background-color: #27ae60;
+  border-radius: 100%;
+  display: inline-block;
+  margin: 0px 10px;
+  border: 10px solid #eee;
+
+  -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+  animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+}
+
+@-webkit-keyframes sk-bouncedelay {
+  0%, 80%, 100% { -webkit-transform: scale(0)  }
+  40% { -webkit-transform: scale(1.0)  }
+}
+
+@keyframes sk-bouncedelay {
+  0%, 80%, 100% {
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  } 40% {
+    -webkit-transform: scale(1.0);
+    transform: scale(1.0);
+  }
+}

@@ -1,0 +1,84 @@
+$fa-font-path: "~@fortawesome/fontawesome-free/webfonts" !default;
+@import "~@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "~@fortawesome/fontawesome-free/scss/solid.scss";
+@import "~@fortawesome/fontawesome-free/scss/brands.scss";
+
+body {
+  background-color: #000 !important;
+}
+
+a {
+  display: inline-block;
+  text-decoration: none;
+  color: #27AE60;
+
+  &:visited, &:hover {
+    color: #27AE60;
+  }
+}
+
+@mixin font-awesome($font) {
+  @extend %fa-icon;
+
+  &:after {
+    font-weight: 900;
+    content: fa-content($font);
+  }
+}
+
+.PacmanGame {
+  position: absolute;
+  top: 10px;
+  margin: 0px;
+  left: calc((100% - 356px) / 2);
+}
+
+.Footer {
+  position: absolute;
+  top: 635px;
+  margin: 0px;
+  width: 356px;
+  left: calc((100% - 356px) / 2);
+  padding: 0px 10px 30px 10px;
+  font-size: 1.15em;
+
+  &__Instructions, &__Credits {
+    color: #ffffff;
+  }
+}
+
+.Icon {
+  &--white {
+    color: #ffffff;
+  }
+}
+
+.GithubIcon {
+  @include font-awesome($fa-var-github);
+  @extend .fab;
+}
+
+.UserAstronautIcon {
+  @include font-awesome($fa-var-user-astronaut);
+  @extend .fas;
+}
+
+.ArrowUpIcon {
+  @include font-awesome($fa-var-arrow-up);
+  @extend .fas;
+}
+
+.ArrowDownIcon {
+  @include font-awesome($fa-var-arrow-down);
+  @extend .fas;
+}
+
+.ArrowLeftIcon {
+  @include font-awesome($fa-var-arrow-left);
+  @extend .fas;
+}
+
+.ArrowRightIcon {
+  @include font-awesome($fa-var-arrow-right);
+  @extend .fas;
+}

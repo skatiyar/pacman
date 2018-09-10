@@ -1,9 +1,11 @@
 'use strict';
 
 const WebpackShellPlugin = require('webpack-shell-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const path = require('path');
-const autoprefixer = require('autoprefixer')
+const autoprefixer = require('autoprefixer');
 
 var config = {
   context: path.join(__dirname, 'src'),
@@ -17,6 +19,9 @@ var config = {
   devServer: {
     contentBase: path.resolve(__dirname, 'src') // dev server
   },
+  optimization: {
+    minimizer: [new OptimizeCSSAssetsPlugin({})]
+  },
   plugins: [
     new WebpackShellPlugin({
       onBuildStart: ['gopherjs build --tags=pacman --output=dist/pacman.js --minify'],
@@ -26,10 +31,14 @@ var config = {
       template: 'index.html'
     }),
     new HtmlWebpackPlugin({
+      title: 'Pacman game view',
       template: 'pacman.html',
       filename: 'pacman.html',
       excludeChunks: ['index']
-    })
+    }),
+    new MiniCssExtractPlugin({
+      filename: "[name].css"
+    }),
   ],
   module: {
     rules: [
@@ -48,8 +57,10 @@ var config = {
       },
       {
         test: /\.css$/,
-        use: [
-          'style-loader',
+          use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+          },
           {
             loader: 'css-loader',
             options: {
@@ -78,7 +89,15 @@ var config = {
       {
         test: /\.scss$/,
         use: [
-          'style-loader',
+          {
+            loader: MiniCssExtractPlugin.loader,
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 1,
+            },
+          },
           {
             loader: 'sass-loader',
             options: {
@@ -104,7 +123,27 @@ var config = {
           }
         ]
       },
-      { test: /\.(png|jpg|svg)$/, loader: 'file-loader?name=images/[name].[ext]&publicPath=/'}
+      { test: /\.(png|jpg|svg)$/, loader: 'file-loader?name=images/[name].[ext]&publicPath=/'},
+      {
+        test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url-loader?limit=10000&mimetype=application/font-woff"
+      },
+      {
+        test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url-loader?limit=10000&mimetype=application/font-woff"
+      },
+      {
+        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url-loader?limit=10000&mimetype=application/octet-stream"
+      },
+      {
+        test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "file-loader"
+      },
+      {
+        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url-loader?limit=10000&mimetype=image/svg+xml"
+      }
     ]
   },
   resolve: {

@@ -2,7 +2,6 @@ package pacman
 
 import (
 	"bytes"
-	"fmt"
 	"image/color"
 	"image/png"
 	"strconv"
@@ -47,11 +46,6 @@ func SkinView(
 		DPI:     72,
 		Hinting: font.HintingFull,
 	})
-	smallFontface := truetype.NewFace(arcadeFont, &truetype.Options{
-		Size:    14,
-		DPI:     72,
-		Hinting: font.HintingFull,
-	})
 
 	width, height := skin.Size()
 	view, viewErr := ebiten.NewImage(width, height, ebiten.FilterDefault)
@@ -71,12 +65,6 @@ func SkinView(
 		if drawErr := view.DrawImage(skin, &ebiten.DrawImageOptions{}); drawErr != nil {
 			return nil, drawErr
 		}
-
-		text.Draw(
-			view,
-			fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS()),
-			smallFontface,
-			24, 18, color.White)
 
 		switch state {
 		case GameStart:
