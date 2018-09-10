@@ -26,6 +26,17 @@ a {
   }
 }
 
+.PacmanGameLoading {
+  position: absolute;
+  top: 10px;
+  margin: 0px;
+  width: 356px;
+  height: 610px;
+  background-image: url("./skin.png");
+  background-size: contain;
+  left: calc((100% - 356px) / 2);
+}
+
 .PacmanGame {
   position: absolute;
   top: 10px;

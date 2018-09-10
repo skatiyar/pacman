@@ -134,8 +134,8 @@ iframe {
 
 
 .Spinner {
-  margin: 100px auto 0;
-  width: 200px;
+  margin: 250px auto;
+  width: 100px;
   text-align: center;
 
   .label__big {
@@ -165,11 +165,11 @@ iframe {
 .Spinner > div {
   width: 18px;
   height: 18px;
-  background-color: #27ae60;
+  background-color: #0000D5;
   border-radius: 100%;
   display: inline-block;
   margin: 0px 10px;
-  border: 10px solid #eee;
+  border: 10px solid #000;
 
   -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
   animation: sk-bouncedelay 1.4s infinite ease-in-out both;
