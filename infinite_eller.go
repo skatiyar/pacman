@@ -61,7 +61,15 @@ func (m *Maze) GrowBy(n int) {
 	for i := m.rows; i < m.rows+n; i++ {
 		m.populateRow(i)
 	}
-	m.rows = m.rows + n
+	m.rows += n
+}
+
+func (m *Maze) Compact(n int) {
+	m.maze = m.maze[n:]
+	for i := 0; i < Columns; i++ {
+		m.maze[0][i].walls[2] = 'S'
+	}
+	m.rows -= n
 }
 
 func (m *Maze) populateRow(row int) {

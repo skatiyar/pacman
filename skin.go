@@ -11,14 +11,13 @@ import (
 	"golang.org/x/image/font"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/hajimehoshi/ebiten/text"
 	"github.com/skatiyar/pacman/assets/fonts"
 	"github.com/skatiyar/pacman/assets/images"
 )
 
 const MaxScoreView = 999999999
-const MaxLifesView = 5
+const MaxLifes = 7
 
 func LoadSkin() (*ebiten.Image, error) {
 	sImage, sImageErr := png.Decode(bytes.NewReader(images.SkinPng))
@@ -44,6 +43,11 @@ func SkinView(
 	arcadeFont *truetype.Font,
 ) (func(state gameState, data *Data) (*ebiten.Image, error), error) {
 	fontface := truetype.NewFace(arcadeFont, &truetype.Options{
+		Size:    28,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	})
+	smallFontface := truetype.NewFace(arcadeFont, &truetype.Options{
 		Size:    14,
 		DPI:     72,
 		Hinting: font.HintingFull,
@@ -55,6 +59,11 @@ func SkinView(
 		return nil, viewErr
 	}
 
+	life, lifeErr := ScaleSprite(powers.Life, 0.5, 0.5)
+	if lifeErr != nil {
+		return nil, lifeErr
+	}
+
 	return func(state gameState, data *Data) (*ebiten.Image, error) {
 		if clearErr := view.Clear(); clearErr != nil {
 			return nil, clearErr
@@ -62,10 +71,12 @@ func SkinView(
 		if drawErr := view.DrawImage(skin, &ebiten.DrawImageOptions{}); drawErr != nil {
 			return nil, drawErr
 		}
-		if fpsErr := ebitenutil.DebugPrint(view,
-			fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())); fpsErr != nil {
-			return nil, fpsErr
-		}
+
+		text.Draw(
+			view,
+			fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS()),
+			smallFontface,
+			24, 18, color.White)
 
 		switch state {
 		case GameStart:
@@ -81,17 +92,18 @@ func SkinView(
 					score = MaxScoreView
 				}
 				numstr := strconv.Itoa(score)
-				text.Draw(view, numstr, fontface, 344-(len(numstr)*15), 35, color.White)
+				text.Draw(view, numstr, fontface, 682-(len(numstr)*27), 64, color.White)
 
-				if lifes > MaxLifesView {
-					lifes = MaxLifesView
+				if lifes > MaxLifes {
+					lifes = MaxLifes
 				}
+
 				ops := &ebiten.DrawImageOptions{}
+				width, _ := life.Size()
 				for i := 0; i < lifes; i++ {
 					ops.GeoM.Reset()
-					ops.GeoM.Scale(0.2, 0.2)
-					ops.GeoM.Translate(float64(330-(16*i)), 42)
-					if drawErr := view.DrawImage(powers.Life, ops); drawErr != nil {
+					ops.GeoM.Translate(float64(650-(width*i)), 80)
+					if drawErr := view.DrawImage(life, ops); drawErr != nil {
 						return nil, drawErr
 					}
 				}

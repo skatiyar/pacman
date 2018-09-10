@@ -6,14 +6,15 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
-const MazeViewSize = 768
+const MazeViewSize = 1536
+const CellSize = 64
 
 func MazeView(
 	walls *Walls,
 ) (func(state gameState, data *Data) (*ebiten.Image, error), error) {
 	limeAlpha := color.RGBA{250, 233, 8, 200}
 
-	dot, dotErr := ebiten.NewImage(4, 4, ebiten.FilterDefault)
+	dot, dotErr := ebiten.NewImage(8, 8, ebiten.FilterDefault)
 	if dotErr != nil {
 		return nil, dotErr
 	}
@@ -21,17 +22,17 @@ func MazeView(
 		return nil, fillErr
 	}
 
-	icWallSide, icWallSideErr := ScaleSprite(walls.InActiveSide, 0.5, 0.5)
+	icWallSide, icWallSideErr := ScaleSprite(walls.InActiveSide, 1.0, 1.0)
 	if icWallSideErr != nil {
 		return nil, icWallSideErr
 	}
 
-	icWallCorner, icWallCornerErr := ScaleSprite(walls.InActiveCorner, 0.5, 0.5)
+	icWallCorner, icWallCornerErr := ScaleSprite(walls.InActiveCorner, 1.0, 1.0)
 	if icWallCornerErr != nil {
 		return nil, icWallCornerErr
 	}
 
-	mazeView, mazeViewErr := ebiten.NewImage(32*Columns, MazeViewSize, ebiten.FilterDefault)
+	mazeView, mazeViewErr := ebiten.NewImage(CellSize*Columns, MazeViewSize, ebiten.FilterDefault)
 	if mazeViewErr != nil {
 		return nil, mazeViewErr
 	}
@@ -49,7 +50,6 @@ func MazeView(
 			return nil, clearErr
 		}
 
-		gridLength := MazeViewSize
 		ops := &ebiten.DrawImageOptions{}
 
 		for i := 0; i < len(data.grid); i++ {
@@ -59,7 +59,8 @@ func MazeView(
 
 				if !data.grid[i][j].Active() {
 					ops.GeoM.Reset()
-					ops.GeoM.Translate(float64(j*32)+14, float64(gridLength-((i*32)+18)))
+					ops.GeoM.Translate(float64(j*CellSize)+28,
+						float64(MazeViewSize-((i*CellSize)+36)))
 					if drawErr := mazeView.DrawImage(dot, ops); drawErr != nil {
 						return nil, drawErr
 					}
@@ -68,7 +69,8 @@ func MazeView(
 				cellWalls := data.grid[i][j].Walls()
 				if cellWalls[0] == 'N' {
 					ops.GeoM.Reset()
-					ops.GeoM.Translate(float64(j*32)+6, float64(gridLength-((i*32)+32)))
+					ops.GeoM.Translate(float64(j*CellSize)+12,
+						float64(MazeViewSize-((i*CellSize)+CellSize)))
 					if drawErr := mazeView.DrawImage(side, ops); drawErr != nil {
 						return nil, drawErr
 					}
@@ -76,14 +78,16 @@ func MazeView(
 				if cellWalls[1] == 'E' {
 					ops.GeoM.Reset()
 					ops.GeoM.Rotate(1.5708)
-					ops.GeoM.Translate(float64(j*32)+32, float64(gridLength-((i*32)+26)))
+					ops.GeoM.Translate(float64(j*CellSize)+CellSize,
+						float64(MazeViewSize-((i*CellSize)+52)))
 					if drawErr := mazeView.DrawImage(side, ops); drawErr != nil {
 						return nil, drawErr
 					}
 				}
 				if cellWalls[2] == 'S' {
 					ops.GeoM.Reset()
-					ops.GeoM.Translate(float64(j*32)+6, float64(gridLength-((i*32)+6)))
+					ops.GeoM.Translate(float64(j*CellSize)+12,
+						float64(MazeViewSize-((i*CellSize)+12)))
 					if drawErr := mazeView.DrawImage(side, ops); drawErr != nil {
 						return nil, drawErr
 					}
@@ -91,32 +95,41 @@ func MazeView(
 				if cellWalls[3] == 'W' {
 					ops.GeoM.Reset()
 					ops.GeoM.Rotate(1.5708)
-					ops.GeoM.Translate(float64(j*32)+6, float64(gridLength-((i*32)+26)))
+					ops.GeoM.Translate(float64(j*CellSize)+12,
+						float64(MazeViewSize-((i*CellSize)+52)))
 					if drawErr := mazeView.DrawImage(side, ops); drawErr != nil {
 						return nil, drawErr
 					}
 				}
 
+				// Corners NE
 				ops.GeoM.Reset()
-				ops.GeoM.Translate(float64(j*32)+26, float64(gridLength-((i*32)+32)))
+				ops.GeoM.Translate(float64(j*CellSize)+52,
+					float64(MazeViewSize-((i*CellSize)+CellSize)))
 				if drawErr := mazeView.DrawImage(corner, ops); drawErr != nil {
 					return nil, drawErr
 				}
 
+				// NW
 				ops.GeoM.Reset()
-				ops.GeoM.Translate(float64(j*32), float64(gridLength-((i*32)+32)))
+				ops.GeoM.Translate(float64(j*CellSize),
+					float64(MazeViewSize-((i*CellSize)+CellSize)))
 				if drawErr := mazeView.DrawImage(corner, ops); drawErr != nil {
 					return nil, drawErr
 				}
 
+				// SE
 				ops.GeoM.Reset()
-				ops.GeoM.Translate(float64(j*32)+26, float64(gridLength-((i*32)+6)))
+				ops.GeoM.Translate(float64(j*CellSize)+52,
+					float64(MazeViewSize-((i*CellSize)+12)))
 				if drawErr := mazeView.DrawImage(corner, ops); drawErr != nil {
 					return nil, drawErr
 				}
 
+				// SW
 				ops.GeoM.Reset()
-				ops.GeoM.Translate(float64(j*32), float64(gridLength-((i*32)+6)))
+				ops.GeoM.Translate(float64(j*CellSize),
+					float64(MazeViewSize-((i*CellSize)+12)))
 				if drawErr := mazeView.DrawImage(corner, ops); drawErr != nil {
 					return nil, drawErr
 				}

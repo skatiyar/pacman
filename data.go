@@ -10,7 +10,9 @@ type Data struct {
 	score       int
 	pacman      Pacman
 	ghosts      []Ghost
+	powers      []Power
 	gridOffsetY float64
+	invincible  bool
 }
 
 const (
@@ -18,13 +20,16 @@ const (
 	East
 	South
 	West
-	None
+)
 
+const (
 	Ghost1 ghostType = iota
 	Ghost2
 	Ghost3
 	Ghost4
+)
 
+const (
 	Life powerType = iota
 	Invincibility
 )
@@ -48,12 +53,8 @@ type Pacman struct {
 
 type Ghost struct {
 	Position
-	kind ghostType
-}
-
-type Power struct {
-	Position
-	kind powerType
+	visited []Position
+	kind    ghostType
 }
 
 func NewGhost(x, y int, kind ghostType, dir direction) Ghost {
@@ -61,9 +62,31 @@ func NewGhost(x, y int, kind ghostType, dir direction) Ghost {
 		Position{
 			cellX:     x,
 			cellY:     y,
-			posX:      float64((x * 32) + 16),
-			posY:      float64((y * 32) + 16),
+			posX:      float64((x * CellSize) + CellSize/2),
+			posY:      float64((y * CellSize) + CellSize/2),
 			direction: dir,
+		},
+		[]Position{
+			Position{
+				cellX:     x,
+				cellY:     y,
+				direction: dir,
+			},
+		},
+		kind,
+	}
+}
+
+type Power struct {
+	Position
+	kind powerType
+}
+
+func NewPower(x, y int, kind powerType) Power {
+	return Power{
+		Position{
+			cellX: x,
+			cellY: y,
 		},
 		kind,
 	}
