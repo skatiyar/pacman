@@ -4,13 +4,54 @@
         <meta charset="UTF-8">
         <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
         <title>Pacman</title>
-    </head>
+    <link href="index.css" rel="stylesheet"></head>
     <body>
         <iframe id="pacman-game"
-            title="Pacman"
+            class="PacmanGame"
+            title="Pacman game view"
             width="356px"
             height="610px"
-            src="pacman.html"
+            src="pacman.html">
         </iframe>
+        <div class="Footer">
+            <div class="Footer__Instructions">
+                <p class="Instructions__Move">
+                    Use
+                    <span class="">
+                        <i class="Icon--white ArrowUpIcon"></i>
+                        <i class="Icon--white ArrowRightIcon"></i>
+                        <i class="Icon--white ArrowDownIcon"></i>
+                        <i class="Icon--white ArrowLeftIcon"></i>
+                    </span>
+                    keys to move.
+                </p>
+                <p>
+                    Collect diamond to increase health &amp; flask to activate power.
+                </p>
+            </div>
+            <div class="Footer__Credits">
+                <p>
+                    Thanks to
+                    <a target="_blank"
+                        href="http://www.classicgaming.cc/classics/pac-man/vector-art">
+                        Classic Gaming
+                    </a>
+                    for providing Pacman &amp; Ghost characters.
+                </p>
+                <p>
+                    Made using
+                    <a href="https://github.com/hajimehoshi/ebiten">
+                        Ebiten
+                    </a>
+                    in Golang.
+                </p>
+            </div>
+            <a href="https://github.com/skatiyar/pacman" target="_blank" title="Github repo">
+                <i class="Icon--white GithubIcon"></i>
+            </a>
+            <a href="https://skatiyar.info" target="_blank" title="Suyash's homepage">
+                <i class="Icon--white UserAstronautIcon"></i>
+            </a>
+        </div>
     <script type="text/javascript" src="bundle.js"></script></body>
 </html>
