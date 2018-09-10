@@ -57,7 +57,7 @@ func MazeView(
 				side := icWallSide
 				corner := icWallCorner
 
-				if !data.grid[i][j].Active() {
+				if !data.grid[i][j].active {
 					ops.GeoM.Reset()
 					ops.GeoM.Translate(float64(j*CellSize)+28,
 						float64(MazeViewSize-((i*CellSize)+36)))
@@ -66,7 +66,7 @@ func MazeView(
 					}
 				}
 
-				cellWalls := data.grid[i][j].Walls()
+				cellWalls := data.grid[i][j].walls
 				if cellWalls[0] == 'N' {
 					ops.GeoM.Reset()
 					ops.GeoM.Translate(float64(j*CellSize)+12,

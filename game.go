@@ -86,7 +86,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 			xcol := g.rand.Intn(Columns)
 			g.data = NewData()
 			g.maze = NewPopulatedMaze(32, g.rand)
-			g.data.grid = g.maze.Get(0, MazeViewSize/CellSize)
+			g.data.grid = rowsToCells(g.maze.Get(0, MazeViewSize/CellSize))
 			g.data.pacman = Pacman{
 				Position{
 					cellX:     xcol,
@@ -143,7 +143,15 @@ func (g *Game) Update(screen *ebiten.Image) error {
 				if (g.maze.Rows() - MazeViewSize/CellSize) < 4 {
 					g.maze.GrowBy(16)
 				}
-				g.data.grid = g.maze.Get(0, MazeViewSize/CellSize)
+
+				newGrid := rowsToCells(g.maze.Get(0, MazeViewSize/CellSize))
+				for i := 4; i < g.data.pacman.cellY+1; i++ {
+					for j := 0; j < Columns; j++ {
+						newGrid[i-4][j].active = g.data.grid[i][j].active
+					}
+				}
+				g.data.grid = newGrid
+
 				g.data.pacman.cellY -= 4
 				g.data.gridOffsetY -= CellSize * 4
 
@@ -258,7 +266,7 @@ func (g *Game) Run() error {
 
 func (g *Game) keybord() {
 	if g.data != nil {
-		walls := g.data.grid[g.data.pacman.cellY][g.data.pacman.cellX].Walls()
+		walls := g.data.grid[g.data.pacman.cellY][g.data.pacman.cellX].walls
 		if upKeyPressed() {
 			if walls[0] == '_' {
 				g.direction = North
