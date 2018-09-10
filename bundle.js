@@ -96,7 +96,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_styles_scss__WEBPACK_IMPORTED_MODULE_1__);
 
 
-console.log('hello');
+var loading = document.getElementById('pacman-game-loading');
+var iframe = document.getElementById('pacman-game');
+
+iframe.onload = function () {
+  iframe.className = 'PacmanGame';
+  loading.className = 'PacmanGameLoading hide';
+};
 
 /***/ }),
 /* 1 */
