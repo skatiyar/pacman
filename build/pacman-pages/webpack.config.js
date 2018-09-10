@@ -13,6 +13,7 @@ var config = {
     index: './index.js'
   },
   output: {
+    publicPath: '/pacman/',
     path: path.resolve(__dirname, 'dist'), // regular webpack
     filename: 'bundle.js'
   },
@@ -123,7 +124,7 @@ var config = {
           }
         ]
       },
-      { test: /\.(png|jpg|svg)$/, loader: 'file-loader?name=images/[name].[ext]&publicPath=/'},
+      { test: /\.(png|jpg|svg)$/, loader: 'file-loader?name=images/[name].[ext]'},
       {
         test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
         loader: "url-loader?limit=10000&mimetype=application/font-woff"
