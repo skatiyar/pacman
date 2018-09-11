@@ -191,14 +191,15 @@ func (g *Game) Update(screen *ebiten.Image) error {
 					case Life:
 						if g.data.lifes < MaxLifes {
 							g.data.lifes += 1
+							g.data.powers[i] = NewPower(cellX, cellY, g.data.powers[i].kind)
 						}
 					case Invincibility:
 						if !g.data.invincible {
 							g.data.invincible = true
 						}
 						g.startCountdown(15)
+						g.data.powers[i] = NewPower(cellX, cellY, g.data.powers[i].kind)
 					}
-					g.data.powers[i] = NewPower(cellX, cellY, g.data.powers[i].kind)
 				}
 			}
 			// check ghosts
