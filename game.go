@@ -123,7 +123,8 @@ func (g *Game) Update(screen *ebiten.Image) error {
 				} else if (cellY-i)%2 == 0 {
 					kind = Ghost2
 				}
-				ghosts = append(ghosts, NewGhost(cellX, cellY, kind, North))
+				ghosts = append(ghosts,
+					NewGhost(cellX, cellY, kind, getExit(g.data.grid[cellY][cellX].walls)))
 			}
 			g.data.ghosts = ghosts
 
@@ -170,7 +171,9 @@ func (g *Game) Update(screen *ebiten.Image) error {
 						cellX := g.rand.Intn(Columns)
 						cellY := g.rand.Intn(4) + ((MazeViewSize / CellSize) - 4)
 						g.data.ghosts[i] = NewGhost(
-							cellX, cellY, g.data.ghosts[i].kind, North)
+							cellX, cellY,
+							g.data.ghosts[i].kind,
+							getExit(g.data.grid[cellY][cellX].walls))
 					}
 				}
 			}
@@ -261,7 +264,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 func (g *Game) Run() error {
 	return ebiten.Run(func(screen *ebiten.Image) error {
 		return g.Update(screen)
-	}, 712, 1220, 1/ebiten.DeviceScaleFactor(), "PACMAN")
+	}, 712, 1220, 0.5, "PACMAN")
 }
 
 func (g *Game) keybord() {
@@ -302,58 +305,6 @@ func (g *Game) startCountdown(duration int) {
 			g.data.invincible = false
 		}
 	}()
-}
-
-func canMove(size float64, posX, posY float64, x, y int, walls [4]rune) bool {
-	psx := posX - size
-	psy := posY - size
-	pex := posX + size
-	pey := posY + size
-
-	sx := x * CellSize
-	sy := y * CellSize
-	ex := sx + CellSize
-	ey := sy + CellSize
-
-	if walls[0] == 'N' {
-		if pey > float64(ey-12) {
-			return false
-		}
-	}
-	if walls[1] == 'E' {
-		if pex > float64(ex-12) {
-			return false
-		}
-	}
-	if walls[2] == 'S' {
-		if psy < float64(sy+12) {
-			return false
-		}
-	}
-	if walls[3] == 'W' {
-		if psx < float64(sx+12) {
-			return false
-		}
-	}
-
-	// NW corner
-	if pey > float64(ey-12) && psx < float64(sx+12) {
-		return false
-	}
-	// NE
-	if pey > float64(ey-12) && pex > float64(ex-12) {
-		return false
-	}
-	// SW
-	if psy < float64(sy+12) && psx < float64(sx+12) {
-		return false
-	}
-	// SE
-	if psy < float64(sy+12) && pex > float64(ex-12) {
-		return false
-	}
-
-	return true
 }
 
 func (g *Game) movePacman() {
@@ -453,76 +404,118 @@ func (g *Game) movePacman() {
 }
 
 func (g *Game) getGhostDirection(i int) direction {
-	pacX := g.data.pacman.cellX
-	pacY := g.data.pacman.cellY
+	pacX := float64((g.data.pacman.cellX * CellSize) + (CellSize / 2))
+	pacY := float64((g.data.pacman.cellY * CellSize) + (CellSize / 2))
+
 	ghost := g.data.ghosts[i]
 
-	if pacX < ghost.cellX &&
-		g.data.grid[ghost.cellY][ghost.cellX].walls[3] == '_' {
-		return West
-	}
-	if pacX > ghost.cellX &&
-		g.data.grid[ghost.cellY][ghost.cellX].walls[1] == '_' {
-		return East
-	}
-	if pacY < ghost.cellY &&
-		g.data.grid[ghost.cellY][ghost.cellX].walls[2] == '_' {
-		return South
-	}
-	if pacY > ghost.cellY &&
-		g.data.grid[ghost.cellY][ghost.cellX].walls[0] == '_' {
-		return North
+	if g.data.pacman.cellX == ghost.cellX && g.data.pacman.cellY == ghost.cellY {
+		return ghost.direction
 	}
 
-	switch ghost.direction {
-	case North, South:
-		if g.data.grid[ghost.cellY][ghost.cellX].walls[1] == '_' {
-			return East
-		} else if g.data.grid[ghost.cellY][ghost.cellX].walls[3] == '_' {
-			return West
-		} else {
-			if ghost.direction == North &&
-				g.data.grid[ghost.cellY][ghost.cellX].walls[0] == 'N' {
-				return South
-			}
-			if ghost.direction == South &&
-				g.data.grid[ghost.cellY][ghost.cellX].walls[2] == 'S' {
-				return North
-			}
-		}
-	case East, West:
-		if g.data.grid[ghost.cellY][ghost.cellX].walls[2] == '_' {
-			return South
-		} else if g.data.grid[ghost.cellY][ghost.cellX].walls[0] == '_' {
-			return North
-		} else {
-			if ghost.direction == East &&
-				g.data.grid[ghost.cellY][ghost.cellX].walls[1] == 'E' {
-				return West
-			}
-			if ghost.direction == West &&
-				g.data.grid[ghost.cellY][ghost.cellX].walls[3] == 'W' {
-				return East
+	x, y := ghost.cellX, ghost.cellY
+	ghsX := float64((x * CellSize) + (CellSize / 2))
+	ghsY := float64((y * CellSize) + (CellSize / 2))
+
+	// since longest path can be m*n
+	prevDist := float64((MazeViewSize/CellSize)*Columns) * CellSize
+	if g.data.invincible {
+		prevDist = 0.0
+	}
+
+	for j := 0; j < 4; j++ {
+		if g.data.grid[ghost.cellY][ghost.cellX].walls[j] == '_' {
+			switch j {
+			case 0: // North
+				// Added to prevent array overflow panic,
+				// since last row in grid might have open North wall
+				if y+1 < MazeViewSize/CellSize {
+					dist := math.Sqrt(math.Pow(ghsX-pacX, 2) + math.Pow((ghsY+CellSize)-pacY, 2))
+					nx, ny := ghost.cellX, ghost.cellY+1
+					if g.directionOfCell(ghost.cellX, ghost.cellY, nx, ny) !=
+						getOppositeDirection(ghost.direction) {
+						if g.data.invincible {
+							if dist > prevDist {
+								x, y, prevDist = nx, ny, dist
+							}
+						} else {
+							if dist < prevDist {
+								x, y, prevDist = nx, ny, dist
+							}
+						}
+					}
+				}
+			case 1: // East
+				dist := math.Sqrt(math.Pow((ghsX+CellSize)-pacX, 2) + math.Pow(ghsY-pacY, 2))
+				nx, ny := ghost.cellX+1, ghost.cellY
+				if g.directionOfCell(ghost.cellX, ghost.cellY, nx, ny) !=
+					getOppositeDirection(ghost.direction) {
+					if g.data.invincible {
+						if dist > prevDist {
+							x, y, prevDist = nx, ny, dist
+						}
+					} else {
+						if dist < prevDist {
+							x, y, prevDist = nx, ny, dist
+						}
+					}
+				}
+			case 2: // South
+				dist := math.Sqrt(math.Pow(ghsX-pacX, 2) + math.Pow((ghsY-CellSize)-pacY, 2))
+				nx, ny := ghost.cellX, ghost.cellY-1
+				if g.directionOfCell(ghost.cellX, ghost.cellY, nx, ny) !=
+					getOppositeDirection(ghost.direction) {
+					if g.data.invincible {
+						if dist > prevDist {
+							x, y, prevDist = nx, ny, dist
+						}
+					} else {
+						if dist < prevDist {
+							x, y, prevDist = nx, ny, dist
+						}
+					}
+				}
+			case 3: // West
+				dist := math.Sqrt(math.Pow((ghsX-CellSize)-pacX, 2) + math.Pow(ghsY-pacY, 2))
+				nx, ny := ghost.cellX-1, ghost.cellY
+				if g.directionOfCell(ghost.cellX, ghost.cellY, nx, ny) !=
+					getOppositeDirection(ghost.direction) {
+					if g.data.invincible {
+						if dist > prevDist {
+							x, y, prevDist = nx, ny, dist
+						}
+					} else {
+						if dist < prevDist {
+							x, y, prevDist = nx, ny, dist
+						}
+					}
+				}
 			}
 		}
 	}
 
-	return ghost.direction
+	return g.directionOfCell(ghost.cellX, ghost.cellY, x, y)
 }
 
 func (g *Game) moveGhost(i int) {
 	speed := 1.0
 	ghost := g.data.ghosts[i]
-	if len(ghost.visited) > Columns {
-		g.data.ghosts[i].visited = ghost.visited[1:]
-	}
+
 	if ghost.cellY >= MazeViewSize/CellSize {
 		return
 	}
 
-	if ghost.posX == float64((CellSize*ghost.cellX)+(CellSize/2)) &&
-		ghost.posY == float64((CellSize*ghost.cellY)+(CellSize/2)) {
-		g.data.ghosts[i].direction = g.getGhostDirection(i)
+	if isIntersection(g.data.grid[ghost.cellY][ghost.cellX].walls) {
+		if ghost.posX == float64((CellSize*ghost.cellX)+(CellSize/2)) &&
+			ghost.posY == float64((CellSize*ghost.cellY)+(CellSize/2)) {
+			g.data.ghosts[i].direction = g.getGhostDirection(i)
+		}
+	} else if isBlocked(g.data.grid[ghost.cellY][ghost.cellX].walls, ghost.direction) ||
+		isDeadend(g.data.grid[ghost.cellY][ghost.cellX].walls) {
+		if ghost.posX == float64((CellSize*ghost.cellX)+(CellSize/2)) &&
+			ghost.posY == float64((CellSize*ghost.cellY)+(CellSize/2)) {
+			g.data.ghosts[i].direction = getExit(g.data.grid[ghost.cellY][ghost.cellX].walls)
+		}
 	}
 
 	switch g.data.ghosts[i].direction {
@@ -611,4 +604,168 @@ func (g *Game) pacmanTouchesGhost(i int) bool {
 	}
 
 	return false
+}
+
+func (g *Game) directionOfCell(cx, cy, nx, ny int) direction {
+	if cx < nx {
+		return East
+	}
+	if cx > nx {
+		return West
+	}
+	if cy < ny {
+		return North
+	}
+	if cy > ny {
+		return South
+	}
+
+	if cx%2 == 0 {
+		return West
+	} else {
+		return East
+	}
+}
+
+func getOppositeDirection(dir direction) direction {
+	switch dir {
+	case North:
+		return South
+	case East:
+		return West
+	case South:
+		return North
+	default:
+		return East
+	}
+}
+
+func numOfWalls(walls [4]rune) int {
+	count := 0
+	if walls[0] == 'N' {
+		count += 1
+	}
+	if walls[1] == 'E' {
+		count += 1
+	}
+	if walls[2] == 'S' {
+		count += 1
+	}
+	if walls[3] == 'W' {
+		count += 1
+	}
+	return count
+}
+
+func isIntersection(walls [4]rune) bool {
+	count := numOfWalls(walls)
+
+	if count >= 3 {
+		return false
+	} else if count == 2 {
+		// covers the case of corridor
+		if walls[0] == walls[2] || walls[1] == walls[3] {
+			return false
+		}
+	}
+	return true
+}
+
+func isDeadend(walls [4]rune) bool {
+	if numOfWalls(walls) >= 3 {
+		return true
+	}
+	return false
+}
+
+func getExit(walls [4]rune) direction {
+	for i := 0; i < 4; i++ {
+		if walls[i] == '_' {
+			switch i {
+			case 0:
+				return North
+			case 1:
+				return East
+			case 2:
+				return South
+			case 3:
+				return West
+			}
+		}
+	}
+	return North
+}
+
+func isBlocked(walls [4]rune, dir direction) bool {
+	switch dir {
+	case North:
+		if walls[0] != '_' {
+			return true
+		}
+	case East:
+		if walls[1] != '_' {
+			return true
+		}
+	case South:
+		if walls[2] != '_' {
+			return true
+		}
+	case West:
+		if walls[3] != '_' {
+			return true
+		}
+	}
+	return false
+}
+
+func canMove(size float64, posX, posY float64, x, y int, walls [4]rune) bool {
+	psx := posX - size
+	psy := posY - size
+	pex := posX + size
+	pey := posY + size
+
+	sx := x * CellSize
+	sy := y * CellSize
+	ex := sx + CellSize
+	ey := sy + CellSize
+
+	if walls[0] == 'N' {
+		if pey > float64(ey-12) {
+			return false
+		}
+	}
+	if walls[1] == 'E' {
+		if pex > float64(ex-12) {
+			return false
+		}
+	}
+	if walls[2] == 'S' {
+		if psy < float64(sy+12) {
+			return false
+		}
+	}
+	if walls[3] == 'W' {
+		if psx < float64(sx+12) {
+			return false
+		}
+	}
+
+	// NW corner
+	if pey > float64(ey-12) && psx < float64(sx+12) {
+		return false
+	}
+	// NE
+	if pey > float64(ey-12) && pex > float64(ex-12) {
+		return false
+	}
+	// SW
+	if psy < float64(sy+12) && psx < float64(sx+12) {
+		return false
+	}
+	// SE
+	if psy < float64(sy+12) && pex > float64(ex-12) {
+		return false
+	}
+
+	return true
 }

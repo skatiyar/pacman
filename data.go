@@ -68,8 +68,7 @@ type Pacman struct {
 
 type Ghost struct {
 	Position
-	visited []Position
-	kind    ghostType
+	kind ghostType
 }
 
 func NewGhost(x, y int, kind ghostType, dir direction) Ghost {
@@ -80,13 +79,6 @@ func NewGhost(x, y int, kind ghostType, dir direction) Ghost {
 			posX:      float64((x * CellSize) + CellSize/2),
 			posY:      float64((y * CellSize) + CellSize/2),
 			direction: dir,
-		},
-		[]Position{
-			Position{
-				cellX:     x,
-				cellY:     y,
-				direction: dir,
-			},
 		},
 		kind,
 	}
