@@ -114,7 +114,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 			ghosts := make([]Ghost, 0)
 			for i := 0; i < MazeViewSize/CellSize; i += 2 {
 				cellX := g.rand.Intn(Columns)
-				cellY := g.rand.Intn(4) + i
+				cellY := g.rand.Intn(2) + i
 				kind := Ghost1
 				if (cellY-i)%4 == 0 {
 					kind = Ghost4

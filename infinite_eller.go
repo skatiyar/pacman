@@ -84,7 +84,11 @@ func (m *Maze) populateRow(row int) {
 				m.rand.Shuffle(len(current), func(i, j int) {
 					current[i], current[j] = current[j], current[i]
 				})
-				gates := int(math.Floor(m.rand.Float64()*(float64(len(current))/2))) + 1
+				offset := 1
+				if len(current) > 2 {
+					offset = 2
+				}
+				gates := int(math.Floor(m.rand.Float64()*(float64(len(current))/2))) + offset
 				for j := 0; j < gates; j++ {
 					m.maze[row-1][current[j]][0] = '_'
 					m.maze[row][current[j]][2] = '_'
