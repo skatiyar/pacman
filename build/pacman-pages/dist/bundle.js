@@ -100,8 +100,8 @@ var loading = document.getElementById('pacman-game-loading');
 var iframe = document.getElementById('pacman-game');
 
 iframe.onload = function () {
-  iframe.className = 'PacmanGame';
   loading.className = 'PacmanGameLoading hide';
+  iframe.className = 'PacmanGame';
 };
 
 /***/ }),

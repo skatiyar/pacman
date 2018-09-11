@@ -4,13 +4,19 @@
         <meta charset="UTF-8">
         <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
         <title><%= htmlWebpackPlugin.options.title %></title>
+        <!-- Instruct Internet Explorer to use its latest rendering engine -->
+        <meta http-equiv="x-ua-compatible" content="ie=edge" />
+        <!-- Search Engine -->
+        <meta name="description" content="Classic pacman with procedurally generated maze, written in Golang" />
     </head>
     <body>
         <div id="pacman-game-loading" class="PacmanGameLoading">
-            <div class="Spinner">
-                <div class="bounce1"></div>
-                <div class="bounce2"></div>
-                <div class="bounce3"></div>
+            <div class="PacmanGameLoading__View">
+                <div class="Spinner">
+                    <div class="bounce1"></div>
+                    <div class="bounce2"></div>
+                    <div class="bounce3"></div>
+                </div>
             </div>
         </div>
         <iframe id="pacman-game"
@@ -21,22 +27,27 @@
             src="pacman.html">
         </iframe>
         <div class="Footer">
-            <div class="Footer__Instructions">
+            <div class="Footer__Section">
                 <p class="Instructions__Move">
-                    Use
-                    <span class="">
-                        <i class="Icon--white ArrowUpIcon"></i>
-                        <i class="Icon--white ArrowRightIcon"></i>
-                        <i class="Icon--white ArrowDownIcon"></i>
-                        <i class="Icon--white ArrowLeftIcon"></i>
+                    <b>HOW TO PLAY:</b> Use
+                    <span>
+                        <i class="Icon--orange ArrowUpIcon"></i>
+                        <i class="Icon--green ArrowRightIcon"></i>
+                        <i class="Icon--blue ArrowDownIcon"></i>
+                        <i class="Icon--red ArrowLeftIcon"></i>
                     </span>
-                    keys to move.
-                </p>
-                <p>
-                    Collect diamond to increase health &amp; flask to activate power.
+                    keys to move pacman. Ghosts try to chase player and
+                    on collision player looses a life.<br />
+                    Player starts with 5 lives and can have upto 7. Collect
+                    <span class="Diamond"></span>
+                    to increase lives.<br />
+                    Use
+                    <span class="Flask"></span>
+                    to gain ability to destroy ghosts, ability lasts for 15 seconds &amp;
+                    ghosts try to runaway from player.
                 </p>
             </div>
-            <div class="Footer__Credits">
+            <div class="Footer__Section">
                 <p>
                     Pacman &amp; Ghost characters have been taken from
                     <a target="_blank"

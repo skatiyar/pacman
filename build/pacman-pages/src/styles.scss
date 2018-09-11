@@ -35,6 +35,21 @@ a {
   background-image: url("./skin.png");
   background-size: contain;
   left: calc((100% - 356px) / 2);
+
+  &__View {
+    position: absolute;
+    top: 80px;
+    left: 18px;
+    width: 320px;
+    height: 512px;
+    margin: 0px;
+    background-color: #000;
+  }
+}
+
+.PacmanGameLoading .Spinner {
+  position: relative;
+  top: 193px;
 }
 
 .PacmanGame {
@@ -48,19 +63,72 @@ a {
   position: absolute;
   top: 635px;
   margin: 0px;
-  width: 356px;
-  left: calc((100% - 356px) / 2);
-  padding: 0px 10px 30px 10px;
-  font-size: 1.15em;
+  width: 500px;
+  left: calc((100% - 500px) / 2);
+  padding: 0px 0px 30px 0px;
 
-  &__Instructions, &__Credits {
-    color: #ffffff;
+  &__Section {
+    font-size: 18px;
+    line-height: 32px;
+    letter-spacing: 1px;
+    color: #eee;
+    border: none;
+    border-bottom: 1px solid rgba(221, 221, 221, 0.3);
+    margin-top: 30px;
+    padding-bottom: 20px;
   }
+}
+
+
+.Diamond {
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-bottom-color: red;
+  position: relative;
+  top: -20px;
+  margin-right: 7px;
+
+  &:after {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 31px;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+    border-top-color: red;
+  }
+}
+
+.Flask {
+  position: relative;
+  top: 3px;
+  height: 20px;
+  width: 20px;
+  background-image: url("./flask.png");
+  background-size: contain;
+  display: inline-block;
 }
 
 .Icon {
   &--white {
     color: #ffffff;
+  }
+  &--blue {
+    color: #52C5CF;
+  }
+  &--green {
+    color: #27AE60;
+  }
+  &--red {
+    color: #EE3323;
+  }
+  &--orange {
+    color: #F9A11A;
+  }
+  &--yellow {
+    color: #FAE908;
   }
 }
 
