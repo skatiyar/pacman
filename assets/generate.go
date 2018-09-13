@@ -11,7 +11,7 @@
 //go:generate file2byteslice -package=sounds -input=./sounds/beginning.wav -output=./sounds/beginning.go -var=BeginningWav
 //go:generate file2byteslice -package=sounds -input=./sounds/chomp.wav -output=./sounds/chomp.go -var=ChompWav
 //go:generate file2byteslice -package=sounds -input=./sounds/death.wav -output=./sounds/death.go -var=DeathWav
-//go:generate file2byteslice -package=sounds -input=./sounds/eatfruit.wav -output=./sounds/eatfruit.go -var=EatFruitWav
+//go:generate file2byteslice -package=sounds -input=./sounds/eatfruit.wav -output=./sounds/eatflask.go -var=EatFlaskWav
 //go:generate file2byteslice -package=sounds -input=./sounds/eatghost.wav -output=./sounds/eatghost.go -var=EatGhostWav
 //go:generate file2byteslice -package=sounds -input=./sounds/extrapac.wav -output=./sounds/extrapac.go -var=ExtraPacWav
 

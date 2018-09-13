@@ -29,6 +29,8 @@ type Game struct {
 	gridView    func(gameState, *Data) (*ebiten.Image, error)
 	direction   direction
 	powerTicker *time.Ticker
+
+	audio *Audio
 }
 
 const (
@@ -62,11 +64,17 @@ func NewGame() (*Game, error) {
 		return nil, skinViewErr
 	}
 
+	audio, audioErr := NewAudio()
+	if audioErr != nil {
+		return nil, audioErr
+	}
+
 	return &Game{
 		rand:     rand.New(rand.NewSource(time.Now().UnixNano())),
 		state:    GameLoading,
 		skinView: skinView,
 		gridView: gridView,
+		audio:    audio,
 	}, nil
 }
 
@@ -122,10 +130,15 @@ func (g *Game) update(screen *ebiten.Image) error {
 			}
 			g.data.ghosts = ghosts
 
+			g.audio.players.Beginning.Pause()
+			g.audio.players.Beginning.Rewind()
+
 			g.state = GameStart
 		} else {
 			g.data = nil
 			g.maze = nil
+
+			g.audio.players.Beginning.Play()
 		}
 	case GameStart:
 		if spaceReleased() {
@@ -186,6 +199,10 @@ func (g *Game) update(screen *ebiten.Image) error {
 						if g.data.lifes < MaxLifes {
 							g.data.lifes += 1
 							g.data.powers[i] = NewPower(cellX, cellY, g.data.powers[i].kind)
+							if !g.audio.players.ExtraPac.IsPlaying() {
+								g.audio.players.ExtraPac.Rewind()
+								g.audio.players.ExtraPac.Play()
+							}
 						}
 					case Invincibility:
 						if !g.data.invincible {
@@ -193,6 +210,10 @@ func (g *Game) update(screen *ebiten.Image) error {
 						}
 						g.startCountdown(10)
 						g.data.powers[i] = NewPower(cellX, cellY, g.data.powers[i].kind)
+						if !g.audio.players.EatFlask.IsPlaying() {
+							g.audio.players.EatFlask.Rewind()
+							g.audio.players.EatFlask.Play()
+						}
 					}
 				}
 			}
@@ -203,6 +224,10 @@ func (g *Game) update(screen *ebiten.Image) error {
 						g.data.lifes -= 1
 					} else {
 						g.data.score += 200
+						if !g.audio.players.EatGhost.IsPlaying() {
+							g.audio.players.EatGhost.Rewind()
+							g.audio.players.EatGhost.Play()
+						}
 					}
 					cellX := g.rand.Intn(Columns)
 					cellY := g.rand.Intn(4) +
@@ -220,6 +245,11 @@ func (g *Game) update(screen *ebiten.Image) error {
 	case GameOver:
 		if spaceReleased() {
 			g.state = GameLoading
+
+			g.audio.players.Death.Pause()
+			g.audio.players.Death.Rewind()
+		} else {
+			g.audio.players.Death.Play()
 		}
 	default:
 		// reset state to GameLoading
@@ -583,9 +613,8 @@ func (g *Game) directionOfCell(cx, cy, nx, ny int) direction {
 
 	if cx%2 == 0 {
 		return West
-	} else {
-		return East
 	}
+	return East
 }
 
 func getOppositeDirection(dir direction) direction {

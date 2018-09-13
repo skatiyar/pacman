@@ -7,8 +7,11 @@ import (
 
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/audio"
+	"github.com/hajimehoshi/ebiten/audio/wav"
 	"github.com/skatiyar/pacman/assets/fonts"
 	"github.com/skatiyar/pacman/assets/images"
+	"github.com/skatiyar/pacman/assets/sounds"
 	"github.com/skatiyar/pacman/spritetools"
 )
 
@@ -41,7 +44,7 @@ type Assets struct {
 }
 
 // LoadAssets converts the character images(png, jpg, ...) to
-// ebiten image format, loads fonts and sounds.
+// ebiten image format and loads fonts.
 func LoadAssets() (*Assets, error) {
 	skin, skinErr := loadSkin()
 	if skinErr != nil {
@@ -203,5 +206,57 @@ func loadWalls() (*Walls, error) {
 		ActiveSide:     activeSide,
 		InActiveCorner: inactiveCorner,
 		InActiveSide:   inactiveSide,
+	}, nil
+}
+
+type Sounds struct {
+	Beginning *wav.Stream
+	Chomp     *wav.Stream
+	Death     *wav.Stream
+	EatFlask  *wav.Stream
+	EatGhost  *wav.Stream
+	ExtraPac  *wav.Stream
+}
+
+// LoadSounds returns a struct with wav files decoded
+// for the provided audio context.
+func LoadSounds(ctx *audio.Context) (*Sounds, error) {
+	beginning, beginningErr := wav.Decode(ctx, audio.BytesReadSeekCloser(sounds.BeginningWav))
+	if beginningErr != nil {
+		return nil, beginningErr
+	}
+
+	chomp, chompErr := wav.Decode(ctx, audio.BytesReadSeekCloser(sounds.ChompWav))
+	if chompErr != nil {
+		return nil, chompErr
+	}
+
+	death, deathErr := wav.Decode(ctx, audio.BytesReadSeekCloser(sounds.DeathWav))
+	if deathErr != nil {
+		return nil, deathErr
+	}
+
+	eatFlask, eatFlaskErr := wav.Decode(ctx, audio.BytesReadSeekCloser(sounds.EatFlaskWav))
+	if eatFlaskErr != nil {
+		return nil, eatFlaskErr
+	}
+
+	eatGhost, eatGhostErr := wav.Decode(ctx, audio.BytesReadSeekCloser(sounds.EatGhostWav))
+	if eatGhostErr != nil {
+		return nil, eatGhostErr
+	}
+
+	extraPac, extraPacErr := wav.Decode(ctx, audio.BytesReadSeekCloser(sounds.ExtraPacWav))
+	if extraPacErr != nil {
+		return nil, extraPacErr
+	}
+
+	return &Sounds{
+		Beginning: beginning,
+		Chomp:     chomp,
+		Death:     death,
+		EatFlask:  eatFlask,
+		EatGhost:  eatGhost,
+		ExtraPac:  extraPac,
 	}, nil
 }
