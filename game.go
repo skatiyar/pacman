@@ -130,15 +130,15 @@ func (g *Game) update(screen *ebiten.Image) error {
 			}
 			g.data.ghosts = ghosts
 
-			// g.audio.players.Beginning.Pause()
-			// g.audio.players.Beginning.Rewind()
+			g.audio.players.Beginning.Pause()
+			g.audio.players.Beginning.Rewind()
 
 			g.state = GameStart
 		} else {
 			g.data = nil
 			g.maze = nil
 
-			// g.audio.players.Beginning.Play()
+			g.audio.players.Beginning.Play()
 		}
 	case GameStart:
 		if spaceReleased() {
@@ -199,12 +199,10 @@ func (g *Game) update(screen *ebiten.Image) error {
 						if g.data.lifes < MaxLifes {
 							g.data.lifes += 1
 							g.data.powers[i] = NewPower(cellX, cellY, g.data.powers[i].kind)
-							/*
-								if !g.audio.players.ExtraPac.IsPlaying() {
-									g.audio.players.ExtraPac.Rewind()
-									g.audio.players.ExtraPac.Play()
-								}
-							*/
+							if !g.audio.players.ExtraPac.IsPlaying() {
+								g.audio.players.ExtraPac.Rewind()
+								g.audio.players.ExtraPac.Play()
+							}
 						}
 					case Invincibility:
 						if !g.data.invincible {
@@ -212,12 +210,10 @@ func (g *Game) update(screen *ebiten.Image) error {
 						}
 						g.startCountdown(10)
 						g.data.powers[i] = NewPower(cellX, cellY, g.data.powers[i].kind)
-						/*
-							if !g.audio.players.EatFlask.IsPlaying() {
-								g.audio.players.EatFlask.Rewind()
-								g.audio.players.EatFlask.Play()
-							}
-						*/
+						if !g.audio.players.EatFlask.IsPlaying() {
+							g.audio.players.EatFlask.Rewind()
+							g.audio.players.EatFlask.Play()
+						}
 					}
 				}
 			}
@@ -228,12 +224,10 @@ func (g *Game) update(screen *ebiten.Image) error {
 						g.data.lifes -= 1
 					} else {
 						g.data.score += 200
-						/*
-							if !g.audio.players.EatGhost.IsPlaying() {
-								g.audio.players.EatGhost.Rewind()
-								g.audio.players.EatGhost.Play()
-							}
-						*/
+						if !g.audio.players.EatGhost.IsPlaying() {
+							g.audio.players.EatGhost.Rewind()
+							g.audio.players.EatGhost.Play()
+						}
 					}
 					cellX := g.rand.Intn(Columns)
 					cellY := g.rand.Intn(4) +
@@ -252,10 +246,10 @@ func (g *Game) update(screen *ebiten.Image) error {
 		if spaceReleased() {
 			g.state = GameLoading
 
-			// g.audio.players.Death.Pause()
-			// g.audio.players.Death.Rewind()
+			g.audio.players.Death.Pause()
+			g.audio.players.Death.Rewind()
 		} else {
-			// g.audio.players.Death.Play()
+			g.audio.players.Death.Play()
 		}
 	default:
 		// reset state to GameLoading
@@ -352,6 +346,11 @@ func (g *Game) movePacman() {
 			)-(g.data.pacman.posY+g.data.gridOffsetY)) < 20 {
 			g.data.grid[ycell][xcell].active = true
 			g.data.score += 1
+			if g.audio.players.Chomp.IsPlaying() {
+				g.audio.players.Chomp.Pause()
+			}
+			g.audio.players.Chomp.Rewind()
+			g.audio.players.Chomp.Play()
 		}
 	}
 

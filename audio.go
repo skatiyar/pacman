@@ -2,6 +2,7 @@ package pacman
 
 import (
 	"io"
+	"io/ioutil"
 
 	"github.com/hajimehoshi/ebiten/audio"
 	"github.com/skatiyar/pacman/assets"
@@ -82,7 +83,12 @@ type AudioPlayers struct {
 }
 
 func newAudioPlayer(ctx *audio.Context, src io.ReadCloser) (*audio.Player, error) {
-	player, err := audio.NewPlayer(ctx, src)
+	buffer, err := ioutil.ReadAll(src)
+	if err != nil {
+		return nil, err
+	}
+
+	player, err := audio.NewPlayerFromBytes(ctx, buffer)
 	if err != nil {
 		return nil, err
 	}

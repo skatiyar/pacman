@@ -8,7 +8,7 @@ import (
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/audio"
-	"github.com/hajimehoshi/ebiten/audio/wav"
+	"github.com/hajimehoshi/ebiten/audio/mp3"
 	"github.com/skatiyar/pacman/assets/fonts"
 	"github.com/skatiyar/pacman/assets/images"
 	"github.com/skatiyar/pacman/assets/sounds"
@@ -210,43 +210,43 @@ func loadWalls() (*Walls, error) {
 }
 
 type Sounds struct {
-	Beginning *wav.Stream
-	Chomp     *wav.Stream
-	Death     *wav.Stream
-	EatFlask  *wav.Stream
-	EatGhost  *wav.Stream
-	ExtraPac  *wav.Stream
+	Beginning *mp3.Stream
+	Chomp     *mp3.Stream
+	Death     *mp3.Stream
+	EatFlask  *mp3.Stream
+	EatGhost  *mp3.Stream
+	ExtraPac  *mp3.Stream
 }
 
 // LoadSounds returns a struct with wav files decoded
 // for the provided audio context.
 func LoadSounds(ctx *audio.Context) (*Sounds, error) {
-	beginning, beginningErr := wav.Decode(ctx, audio.BytesReadSeekCloser(sounds.BeginningWav))
+	beginning, beginningErr := mp3.Decode(ctx, audio.BytesReadSeekCloser(sounds.BeginningMp3))
 	if beginningErr != nil {
 		return nil, beginningErr
 	}
 
-	chomp, chompErr := wav.Decode(ctx, audio.BytesReadSeekCloser(sounds.ChompWav))
+	chomp, chompErr := mp3.Decode(ctx, audio.BytesReadSeekCloser(sounds.ChompMp3))
 	if chompErr != nil {
 		return nil, chompErr
 	}
 
-	death, deathErr := wav.Decode(ctx, audio.BytesReadSeekCloser(sounds.DeathWav))
+	death, deathErr := mp3.Decode(ctx, audio.BytesReadSeekCloser(sounds.DeathMp3))
 	if deathErr != nil {
 		return nil, deathErr
 	}
 
-	eatFlask, eatFlaskErr := wav.Decode(ctx, audio.BytesReadSeekCloser(sounds.EatFlaskWav))
+	eatFlask, eatFlaskErr := mp3.Decode(ctx, audio.BytesReadSeekCloser(sounds.EatFlaskMp3))
 	if eatFlaskErr != nil {
 		return nil, eatFlaskErr
 	}
 
-	eatGhost, eatGhostErr := wav.Decode(ctx, audio.BytesReadSeekCloser(sounds.EatGhostWav))
+	eatGhost, eatGhostErr := mp3.Decode(ctx, audio.BytesReadSeekCloser(sounds.EatGhostMp3))
 	if eatGhostErr != nil {
 		return nil, eatGhostErr
 	}
 
-	extraPac, extraPacErr := wav.Decode(ctx, audio.BytesReadSeekCloser(sounds.ExtraPacWav))
+	extraPac, extraPacErr := mp3.Decode(ctx, audio.BytesReadSeekCloser(sounds.ExtraPacMp3))
 	if extraPacErr != nil {
 		return nil, extraPacErr
 	}
