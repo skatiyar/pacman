@@ -1,3 +1,12 @@
+// Package pacman implements the classic Pacman game, with a
+// procedurally generated, infinite vertical maze.
+//
+// How to play:
+// Use direction keys to move pacman. Ghosts try to chase player and
+// on collision player looses a life. Player starts with 5 lives and
+// can have upto 7. Collect diamond to increase lives. Use flask to
+// gain ability to destroy ghosts, ability lasts for 10 seconds & ghosts
+// try to runaway from player. Eating a ghost gives bonus of 200 points.
 package pacman
 
 import (
