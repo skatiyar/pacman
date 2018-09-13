@@ -8,6 +8,8 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
+	"github.com/skatiyar/pacman/assets"
+	"github.com/skatiyar/pacman/spritetools"
 )
 
 const GridViewSize = 1024
@@ -15,8 +17,8 @@ const GridViewSize = 1024
 var GrayColor = color.RGBA{236, 240, 241, 255.0}
 
 func GridView(
-	characters *Characters,
-	powers *Powers,
+	characters *assets.Characters,
+	powers *assets.Powers,
 	arcadeFont *truetype.Font,
 	mazeView func(state gameState, data *Data) (*ebiten.Image, error),
 ) (func(state gameState, data *Data) (*ebiten.Image, error), error) {
@@ -26,37 +28,37 @@ func GridView(
 		Hinting: font.HintingFull,
 	})
 
-	pacman, pacmanErr := ScaleSprite(characters.Pacman, 0.5, 0.5)
+	pacman, pacmanErr := spritetools.ScaleSprite(characters.Pacman, 0.5, 0.5)
 	if pacmanErr != nil {
 		return nil, pacmanErr
 	}
 
-	ghost1, ghost1Err := ScaleSprite(characters.Ghost1, 0.5, 0.5)
+	ghost1, ghost1Err := spritetools.ScaleSprite(characters.Ghost1, 0.5, 0.5)
 	if ghost1Err != nil {
 		return nil, ghost1Err
 	}
 
-	ghost2, ghost2Err := ScaleSprite(characters.Ghost2, 0.5, 0.5)
+	ghost2, ghost2Err := spritetools.ScaleSprite(characters.Ghost2, 0.5, 0.5)
 	if ghost2Err != nil {
 		return nil, ghost2Err
 	}
 
-	ghost3, ghost3Err := ScaleSprite(characters.Ghost3, 0.5, 0.5)
+	ghost3, ghost3Err := spritetools.ScaleSprite(characters.Ghost3, 0.5, 0.5)
 	if ghost3Err != nil {
 		return nil, ghost3Err
 	}
 
-	ghost4, ghost4Err := ScaleSprite(characters.Ghost4, 0.5, 0.5)
+	ghost4, ghost4Err := spritetools.ScaleSprite(characters.Ghost4, 0.5, 0.5)
 	if ghost4Err != nil {
 		return nil, ghost4Err
 	}
 
-	life, lifeErr := ScaleSprite(powers.Life, 0.5, 0.5)
+	life, lifeErr := spritetools.ScaleSprite(powers.Life, 0.5, 0.5)
 	if lifeErr != nil {
 		return nil, lifeErr
 	}
 
-	invinci, invinciErr := ScaleSprite(powers.Invincibility, 0.5, 0.5)
+	invinci, invinciErr := spritetools.ScaleSprite(powers.Invincibility, 0.5, 0.5)
 	if invinciErr != nil {
 		return nil, invinciErr
 	}
@@ -200,23 +202,4 @@ func GridView(
 
 		return view, nil
 	}, nil
-}
-
-func ScaleSprite(sprite *ebiten.Image, x, y float64) (*ebiten.Image, error) {
-	spriteW, spriteH := sprite.Size()
-	sSprite, sSpriteErr := ebiten.NewImage(
-		int(float64(spriteW)*x),
-		int(float64(spriteH)*y),
-		ebiten.FilterDefault)
-	if sSpriteErr != nil {
-		return nil, sSpriteErr
-	}
-
-	ops := &ebiten.DrawImageOptions{}
-	ops.GeoM.Scale(x, y)
-	if drawErr := sSprite.DrawImage(sprite, ops); drawErr != nil {
-		return nil, drawErr
-	}
-
-	return sSprite, nil
 }

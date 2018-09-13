@@ -1,4 +1,5 @@
 // +build pacman jsgo
+
 package main
 
 import (

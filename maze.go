@@ -4,13 +4,15 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/skatiyar/pacman/assets"
+	"github.com/skatiyar/pacman/spritetools"
 )
 
 const MazeViewSize = 1536
 const CellSize = 64
 
 func MazeView(
-	walls *Walls,
+	walls *assets.Walls,
 ) (func(state gameState, data *Data) (*ebiten.Image, error), error) {
 	limeAlpha := color.RGBA{250, 233, 8, 200}
 
@@ -22,12 +24,12 @@ func MazeView(
 		return nil, fillErr
 	}
 
-	icWallSide, icWallSideErr := ScaleSprite(walls.InActiveSide, 1.0, 1.0)
+	icWallSide, icWallSideErr := spritetools.ScaleSprite(walls.InActiveSide, 1.0, 1.0)
 	if icWallSideErr != nil {
 		return nil, icWallSideErr
 	}
 
-	icWallCorner, icWallCornerErr := ScaleSprite(walls.InActiveCorner, 1.0, 1.0)
+	icWallCorner, icWallCornerErr := spritetools.ScaleSprite(walls.InActiveCorner, 1.0, 1.0)
 	if icWallCornerErr != nil {
 		return nil, icWallCornerErr
 	}

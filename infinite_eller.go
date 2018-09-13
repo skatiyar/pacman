@@ -5,6 +5,7 @@ import (
 	"math/rand"
 )
 
+// MagicNumber
 const MagicNumber = 0.7
 const Columns = 10
 

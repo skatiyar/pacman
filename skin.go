@@ -1,9 +1,7 @@
 package pacman
 
 import (
-	"bytes"
 	"image/color"
-	"image/png"
 	"strconv"
 
 	"github.com/golang/freetype/truetype"
@@ -11,34 +9,16 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
-	"github.com/skatiyar/pacman/assets/fonts"
-	"github.com/skatiyar/pacman/assets/images"
+	"github.com/skatiyar/pacman/assets"
+	"github.com/skatiyar/pacman/spritetools"
 )
 
 const MaxScoreView = 999999999
 const MaxLifes = 7
 
-func LoadSkin() (*ebiten.Image, error) {
-	sImage, sImageErr := png.Decode(bytes.NewReader(images.SkinPng))
-	if sImageErr != nil {
-		return nil, sImageErr
-	}
-
-	skin, skinErr := ebiten.NewImageFromImage(sImage, ebiten.FilterDefault)
-	if skinErr != nil {
-		return nil, skinErr
-	}
-
-	return skin, nil
-}
-
-func LoadArcadeFont() (*truetype.Font, error) {
-	return truetype.Parse(fonts.ArcadeTTF)
-}
-
 func SkinView(
 	skin *ebiten.Image,
-	powers *Powers,
+	powers *assets.Powers,
 	arcadeFont *truetype.Font,
 ) (func(state gameState, data *Data) (*ebiten.Image, error), error) {
 	fontface := truetype.NewFace(arcadeFont, &truetype.Options{
@@ -53,7 +33,7 @@ func SkinView(
 		return nil, viewErr
 	}
 
-	life, lifeErr := ScaleSprite(powers.Life, 0.5, 0.5)
+	life, lifeErr := spritetools.ScaleSprite(powers.Life, 0.5, 0.5)
 	if lifeErr != nil {
 		return nil, lifeErr
 	}

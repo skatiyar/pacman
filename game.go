@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/skatiyar/pacman/assets"
 )
 
 type gameState int
@@ -31,42 +32,23 @@ const (
 )
 
 func NewGame() (*Game, error) {
-	skin, skinErr := LoadSkin()
-	if skinErr != nil {
-		return nil, skinErr
+	lAssets, assetsErr := assets.LoadAssets()
+	if assetsErr != nil {
+		return nil, assetsErr
 	}
 
-	font, fontErr := LoadArcadeFont()
-	if fontErr != nil {
-		return nil, fontErr
-	}
-
-	characters, charactersErr := LoadCharacters()
-	if charactersErr != nil {
-		return nil, charactersErr
-	}
-
-	powers, powersErr := LoadPowers()
-	if powersErr != nil {
-		return nil, powersErr
-	}
-
-	walls, wallsErr := LoadWalls()
-	if wallsErr != nil {
-		return nil, wallsErr
-	}
-
-	mazeView, mazeViewErr := MazeView(walls)
+	mazeView, mazeViewErr := MazeView(lAssets.Walls)
 	if mazeViewErr != nil {
 		return nil, mazeViewErr
 	}
 
-	gridView, gridViewErr := GridView(characters, powers, font, mazeView)
+	gridView, gridViewErr := GridView(lAssets.Characters, lAssets.Powers,
+		lAssets.ArcadeFont, mazeView)
 	if gridViewErr != nil {
 		return nil, gridViewErr
 	}
 
-	skinView, skinViewErr := SkinView(skin, powers, font)
+	skinView, skinViewErr := SkinView(lAssets.Skin, lAssets.Powers, lAssets.ArcadeFont)
 	if skinViewErr != nil {
 		return nil, skinViewErr
 	}
@@ -197,7 +179,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 						if !g.data.invincible {
 							g.data.invincible = true
 						}
-						g.startCountdown(15)
+						g.startCountdown(10)
 						g.data.powers[i] = NewPower(cellX, cellY, g.data.powers[i].kind)
 					}
 				}
@@ -424,7 +406,7 @@ func (g *Game) getGhostDirection(i int) direction {
 		prevDist = 0.0
 	}
 
-	for j := 0; j < 4; j++ {
+	for j := range g.rand.Perm(4) {
 		if g.data.grid[ghost.cellY][ghost.cellX].walls[j] == '_' {
 			switch j {
 			case 0: // North
