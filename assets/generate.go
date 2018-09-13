@@ -15,5 +15,4 @@
 //go:generate file2byteslice -package=sounds -input=./sounds/eatghost.wav -output=./sounds/eatghost.go -var=EatGhostWav
 //go:generate file2byteslice -package=sounds -input=./sounds/extrapac.wav -output=./sounds/extrapac.go -var=ExtraPacWav
 
-// Asstes package contains font, image & sound resources needed by the game
 package assets

@@ -1,4 +1,4 @@
-// Spritetools package provides functions to
+// Package spritetools provides functions to
 // manipulate ebiten images.
 package spritetools
 
@@ -8,6 +8,9 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
+// GetSprite returns a new image from source,
+// of size width x height. Starting point of image is
+// specified by the xoffset & yoffset.
 func GetSprite(
 	width, height int,
 	xoffset, yoffset int,
@@ -29,8 +32,10 @@ func GetSprite(
 	return sprite, nil
 }
 
-func ScaleSprite(sprite *ebiten.Image, x, y float64) (*ebiten.Image, error) {
-	spriteW, spriteH := sprite.Size()
+// ScaleSprite returns a new image from source,
+// scaled by the given x & y.
+func ScaleSprite(src *ebiten.Image, x, y float64) (*ebiten.Image, error) {
+	spriteW, spriteH := src.Size()
 	sSprite, sSpriteErr := ebiten.NewImage(
 		int(float64(spriteW)*x),
 		int(float64(spriteH)*y),
@@ -41,7 +46,7 @@ func ScaleSprite(sprite *ebiten.Image, x, y float64) (*ebiten.Image, error) {
 
 	ops := &ebiten.DrawImageOptions{}
 	ops.GeoM.Scale(x, y)
-	if drawErr := sSprite.DrawImage(sprite, ops); drawErr != nil {
+	if drawErr := sSprite.DrawImage(src, ops); drawErr != nil {
 		return nil, drawErr
 	}
 

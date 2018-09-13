@@ -61,7 +61,7 @@ func NewGame() (*Game, error) {
 	}, nil
 }
 
-func (g *Game) Update(screen *ebiten.Image) error {
+func (g *Game) update(screen *ebiten.Image) error {
 	switch g.state {
 	case GameLoading:
 		if spaceReleased() {
@@ -95,7 +95,10 @@ func (g *Game) Update(screen *ebiten.Image) error {
 
 			ghosts := make([]Ghost, 0)
 			for i := 0; i < MazeViewSize/CellSize; i += 2 {
-				cellX := g.rand.Intn(Columns)
+				cellX := g.rand.Intn(Columns/2) + Columns/2
+				if i%4 == 0 {
+					cellX = g.rand.Intn(Columns / 2)
+				}
 				cellY := g.rand.Intn(2) + i
 				kind := Ghost1
 				if (cellY-i)%4 == 0 {
@@ -105,8 +108,8 @@ func (g *Game) Update(screen *ebiten.Image) error {
 				} else if (cellY-i)%2 == 0 {
 					kind = Ghost2
 				}
-				ghosts = append(ghosts,
-					NewGhost(cellX, cellY, kind, getExit(g.data.grid[cellY][cellX].walls)))
+				ghosts = append(ghosts, NewGhost(cellX, cellY, kind, getExit(
+					g.data.grid[cellY][cellX].walls)))
 			}
 			g.data.ghosts = ghosts
 
@@ -246,8 +249,8 @@ func (g *Game) Update(screen *ebiten.Image) error {
 
 func (g *Game) Run() error {
 	return ebiten.Run(func(screen *ebiten.Image) error {
-		return g.Update(screen)
-	}, 712, 1220, 0.5, "PACMAN")
+		return g.update(screen)
+	}, 712, 1220, 0.5, "PACMAN") // scale is kept to 0.5, for good rendering in retina.
 }
 
 func (g *Game) keybord() {
@@ -408,69 +411,35 @@ func (g *Game) getGhostDirection(i int) direction {
 
 	for j := range g.rand.Perm(4) {
 		if g.data.grid[ghost.cellY][ghost.cellX].walls[j] == '_' {
+			nx, ny := 0, 0
+			dist := 0.0
 			switch j {
 			case 0: // North
 				// Added to prevent array overflow panic,
 				// since last row in grid might have open North wall
 				if y+1 < MazeViewSize/CellSize {
-					dist := math.Sqrt(math.Pow(ghsX-pacX, 2) + math.Pow((ghsY+CellSize)-pacY, 2))
-					nx, ny := ghost.cellX, ghost.cellY+1
-					if g.directionOfCell(ghost.cellX, ghost.cellY, nx, ny) !=
-						getOppositeDirection(ghost.direction) {
-						if g.data.invincible {
-							if dist > prevDist {
-								x, y, prevDist = nx, ny, dist
-							}
-						} else {
-							if dist < prevDist {
-								x, y, prevDist = nx, ny, dist
-							}
-						}
-					}
+					dist = math.Sqrt(math.Pow(ghsX-pacX, 2) + math.Pow((ghsY+CellSize)-pacY, 2))
+					nx, ny = ghost.cellX, ghost.cellY+1
 				}
 			case 1: // East
-				dist := math.Sqrt(math.Pow((ghsX+CellSize)-pacX, 2) + math.Pow(ghsY-pacY, 2))
-				nx, ny := ghost.cellX+1, ghost.cellY
-				if g.directionOfCell(ghost.cellX, ghost.cellY, nx, ny) !=
-					getOppositeDirection(ghost.direction) {
-					if g.data.invincible {
-						if dist > prevDist {
-							x, y, prevDist = nx, ny, dist
-						}
-					} else {
-						if dist < prevDist {
-							x, y, prevDist = nx, ny, dist
-						}
-					}
-				}
+				dist = math.Sqrt(math.Pow((ghsX+CellSize)-pacX, 2) + math.Pow(ghsY-pacY, 2))
+				nx, ny = ghost.cellX+1, ghost.cellY
 			case 2: // South
-				dist := math.Sqrt(math.Pow(ghsX-pacX, 2) + math.Pow((ghsY-CellSize)-pacY, 2))
-				nx, ny := ghost.cellX, ghost.cellY-1
-				if g.directionOfCell(ghost.cellX, ghost.cellY, nx, ny) !=
-					getOppositeDirection(ghost.direction) {
-					if g.data.invincible {
-						if dist > prevDist {
-							x, y, prevDist = nx, ny, dist
-						}
-					} else {
-						if dist < prevDist {
-							x, y, prevDist = nx, ny, dist
-						}
-					}
-				}
+				dist = math.Sqrt(math.Pow(ghsX-pacX, 2) + math.Pow((ghsY-CellSize)-pacY, 2))
+				nx, ny = ghost.cellX, ghost.cellY-1
 			case 3: // West
-				dist := math.Sqrt(math.Pow((ghsX-CellSize)-pacX, 2) + math.Pow(ghsY-pacY, 2))
-				nx, ny := ghost.cellX-1, ghost.cellY
-				if g.directionOfCell(ghost.cellX, ghost.cellY, nx, ny) !=
-					getOppositeDirection(ghost.direction) {
-					if g.data.invincible {
-						if dist > prevDist {
-							x, y, prevDist = nx, ny, dist
-						}
-					} else {
-						if dist < prevDist {
-							x, y, prevDist = nx, ny, dist
-						}
+				dist = math.Sqrt(math.Pow((ghsX-CellSize)-pacX, 2) + math.Pow(ghsY-pacY, 2))
+				nx, ny = ghost.cellX-1, ghost.cellY
+			}
+			if g.directionOfCell(ghost.cellX, ghost.cellY, nx, ny) !=
+				getOppositeDirection(ghost.direction) {
+				if g.data.invincible {
+					if dist > prevDist {
+						x, y, prevDist = nx, ny, dist
+					}
+				} else {
+					if dist < prevDist {
+						x, y, prevDist = nx, ny, dist
 					}
 				}
 			}

@@ -1,3 +1,4 @@
+// Package assets contains font, image & sound resources needed by the game
 package assets
 
 import (
@@ -39,6 +40,8 @@ type Assets struct {
 	Walls      *Walls
 }
 
+// LoadAssets converts the character images(png, jpg, ...) to
+// ebiten image format, loads fonts and sounds.
 func LoadAssets() (*Assets, error) {
 	skin, skinErr := loadSkin()
 	if skinErr != nil {
