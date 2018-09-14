@@ -18,7 +18,7 @@ Maze represents a maze of size rows x 10.
 
 Maze creation is based on modified version of Eller's algorithm
 http://weblog.jamisbuck.org/2010/12/29/maze-generation-eller-s-algorithm.
-Eller's algorithm creates perfect a maze, a perfect maze has only one path
+Eller's algorithm creates a perfect maze, a perfect maze has only one path
 between any two cells. Secondly to create next row, it requires knowledge
 of current row only. Giving us ability to create maze with infinite rows.
 
