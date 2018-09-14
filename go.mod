@@ -7,7 +7,6 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20180825215210-0210a2f0f73c // indirect
 	github.com/hajimehoshi/ebiten v1.7.3
 	github.com/hajimehoshi/oto v0.1.3 // indirect
-	github.com/kr/pty v1.1.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/testify v1.2.2
 	github.com/theckman/go-flock v0.5.0 // indirect
