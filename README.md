@@ -15,3 +15,8 @@ $ go get -u github.com/skatiyar/pacman
 $ cd skatiyar/pacman/build/pacman
 $ go run main.go
 ```
+
+
+## Usage
+
+see → [web-site](https://skatiyar.github.io/pacman/)
