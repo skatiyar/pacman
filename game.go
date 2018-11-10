@@ -257,7 +257,7 @@ func (g *Game) update(screen *ebiten.Image) error {
 		g.state = GameLoading
 	}
 
-	if ebiten.IsRunningSlowly() {
+	if ebiten.IsDrawingSkipped() {
 		return nil
 	}
 
