@@ -1,8 +1,6 @@
 package pacman
 
 import (
-	"image/color"
-
 	"github.com/hajimehoshi/ebiten"
 	"github.com/skatiyar/pacman/assets"
 	"github.com/skatiyar/pacman/spritetools"
@@ -14,16 +12,6 @@ const CellSize = 64
 func MazeView(
 	walls *assets.Walls,
 ) (func(state gameState, data *Data) (*ebiten.Image, error), error) {
-	limeAlpha := color.RGBA{250, 233, 8, 200}
-
-	dot, dotErr := ebiten.NewImage(8, 8, ebiten.FilterDefault)
-	if dotErr != nil {
-		return nil, dotErr
-	}
-	if fillErr := dot.Fill(limeAlpha); fillErr != nil {
-		return nil, fillErr
-	}
-
 	icWallSide, icWallSideErr := spritetools.ScaleSprite(walls.InActiveSide, 1.0, 1.0)
 	if icWallSideErr != nil {
 		return nil, icWallSideErr
@@ -39,7 +27,7 @@ func MazeView(
 		return nil, mazeViewErr
 	}
 
-	var lastGrid [][Columns]Cell
+	var lastGrid [][Columns][4]rune
 
 	return func(state gameState, data *Data) (*ebiten.Image, error) {
 		if equal, copy := deepEqual(lastGrid, data.grid); equal {
@@ -59,16 +47,7 @@ func MazeView(
 				side := icWallSide
 				corner := icWallCorner
 
-				if !data.grid[i][j].active {
-					ops.GeoM.Reset()
-					ops.GeoM.Translate(float64(j*CellSize)+28,
-						float64(MazeViewSize-((i*CellSize)+36)))
-					if drawErr := mazeView.DrawImage(dot, ops); drawErr != nil {
-						return nil, drawErr
-					}
-				}
-
-				cellWalls := data.grid[i][j].walls
+				cellWalls := data.grid[i][j]
 				if cellWalls[0] == 'N' {
 					ops.GeoM.Reset()
 					ops.GeoM.Translate(float64(j*CellSize)+12,
@@ -142,11 +121,11 @@ func MazeView(
 	}, nil
 }
 
-func deepEqual(previous, next [][Columns]Cell) (bool, [][Columns]Cell) {
-	deepCopy := func(src [][Columns]Cell) [][Columns]Cell {
-		copy := make([][Columns]Cell, 0)
+func deepEqual(previous, next [][Columns][4]rune) (bool, [][Columns][4]rune) {
+	deepCopy := func(src [][Columns][4]rune) [][Columns][4]rune {
+		copy := make([][Columns][4]rune, 0)
 		for i := 0; i < len(next); i++ {
-			row := [Columns]Cell{}
+			row := [Columns][4]rune{}
 			for j := 0; j < Columns; j++ {
 				row[j] = next[i][j]
 			}

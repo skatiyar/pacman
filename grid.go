@@ -28,6 +28,16 @@ func GridView(
 		Hinting: font.HintingFull,
 	})
 
+	limeAlpha := color.RGBA{250, 233, 8, 200}
+
+	dot, dotErr := ebiten.NewImage(8, 8, ebiten.FilterDefault)
+	if dotErr != nil {
+		return nil, dotErr
+	}
+	if fillErr := dot.Fill(limeAlpha); fillErr != nil {
+		return nil, fillErr
+	}
+
 	pacman, pacmanErr := spritetools.ScaleSprite(characters.Pacman, 0.5, 0.5)
 	if pacmanErr != nil {
 		return nil, pacmanErr
@@ -94,6 +104,22 @@ func GridView(
 				return nil, drawErr
 			}
 
+			for i := 0; i < len(data.active); i++ {
+				for j := 0; j < Columns; j++ {
+					if !data.active[i][j] {
+						ops.GeoM.Reset()
+						ops.GeoM.Translate(
+							float64((j*CellSize)+30),
+							-(float64(((i*CellSize)+
+								(CellSize/2))+2) -
+								(GridViewSize + data.gridOffsetY)))
+						if drawErr := view.DrawImage(dot, ops); drawErr != nil {
+							return nil, drawErr
+						}
+					}
+				}
+			}
+
 			for i := 0; i < len(data.powers); i++ {
 				power := data.powers[i]
 				powerImg := life
@@ -104,8 +130,8 @@ func GridView(
 				ops.GeoM.Reset()
 				ops.GeoM.Translate(
 					float64((data.powers[i].cellX*CellSize)+pwidth/2),
-					-(float64(((data.powers[i].cellY*CellSize)+(CellSize/2))+pheight/2) -
-						(GridViewSize + data.gridOffsetY)))
+					-(float64(((data.powers[i].cellY*CellSize)+
+						(CellSize/2))+pheight/2) - (GridViewSize + data.gridOffsetY)))
 				if drawErr := view.DrawImage(powerImg, ops); drawErr != nil {
 					return nil, drawErr
 				}

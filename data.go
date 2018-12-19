@@ -4,13 +4,9 @@ type direction int
 type ghostType int
 type powerType int
 
-type Cell struct {
-	walls  [4]rune
-	active bool
-}
-
 type Data struct {
-	grid        [][Columns]Cell
+	grid        [][Columns][4]rune
+	active      [][Columns]bool
 	lifes       int
 	score       int
 	pacman      Pacman
@@ -44,16 +40,6 @@ func NewData() *Data {
 		lifes: 5,
 		score: 1,
 	}
-}
-
-func rowsToCells(rows [][Columns][4]rune) [][Columns]Cell {
-	cells := make([][Columns]Cell, len(rows), len(rows))
-	for i := 0; i < len(rows); i++ {
-		for j := 0; j < Columns; j++ {
-			cells[i][j].walls = rows[i][j]
-		}
-	}
-	return cells
 }
 
 type Position struct {

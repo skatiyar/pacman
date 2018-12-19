@@ -83,9 +83,11 @@ func (g *Game) update(screen *ebiten.Image) error {
 	case GameLoading:
 		if spaceReleased() {
 			xcol := g.rand.Intn(Columns)
+			numOfRows := MazeViewSize / CellSize
 			g.data = NewData()
 			g.maze = NewPopulatedMaze(32, g.rand)
-			g.data.grid = rowsToCells(g.maze.Get(0, MazeViewSize/CellSize))
+			g.data.grid = g.maze.Get(0, numOfRows)
+			g.data.active = make([][Columns]bool, numOfRows, numOfRows)
 			g.data.pacman = Pacman{
 				Position{
 					cellX:     xcol,
@@ -96,10 +98,10 @@ func (g *Game) update(screen *ebiten.Image) error {
 				},
 			}
 			g.direction = g.data.pacman.direction
-			g.data.grid[0][xcol].active = true
+			g.data.active[0][xcol] = true
 
 			powers := make([]Power, 0)
-			for i := 0; i < MazeViewSize/CellSize; i += 4 {
+			for i := 0; i < numOfRows; i += 4 {
 				cellX := g.rand.Intn(Columns)
 				cellY := g.rand.Intn(4) + i
 				kind := Invincibility
@@ -111,7 +113,7 @@ func (g *Game) update(screen *ebiten.Image) error {
 			g.data.powers = powers
 
 			ghosts := make([]Ghost, 0)
-			for i := 0; i < MazeViewSize/CellSize; i += 2 {
+			for i := 0; i < numOfRows; i += 2 {
 				cellX := g.rand.Intn(Columns/2) + Columns/2
 				if i%4 == 0 {
 					cellX = g.rand.Intn(Columns / 2)
@@ -126,7 +128,7 @@ func (g *Game) update(screen *ebiten.Image) error {
 					kind = Ghost2
 				}
 				ghosts = append(ghosts, NewGhost(cellX, cellY, kind, getExit(
-					g.data.grid[cellY][cellX].walls)))
+					g.data.grid[cellY][cellX])))
 			}
 			g.data.ghosts = ghosts
 
@@ -146,19 +148,24 @@ func (g *Game) update(screen *ebiten.Image) error {
 		} else if g.data.lifes < 1 {
 			g.state = GameOver
 		} else {
+			numOfRows := MazeViewSize / CellSize
 			if g.data.pacman.cellY == len(g.data.grid)-8 {
 				g.maze.Compact(4)
-				if (g.maze.Rows() - MazeViewSize/CellSize) < 4 {
+				if (g.maze.Rows() - numOfRows) < 4 {
 					g.maze.GrowBy(16)
 				}
 
-				newGrid := rowsToCells(g.maze.Get(0, MazeViewSize/CellSize))
-				for i := 4; i < g.data.pacman.cellY+1; i++ {
+				g.data.grid = g.maze.Get(0, numOfRows)
+				// shift active grid by 4
+				for i := 4; i <= len(g.data.active); i++ {
 					for j := 0; j < Columns; j++ {
-						newGrid[i-4][j].active = g.data.grid[i][j].active
+						if i <= g.data.pacman.cellY {
+							g.data.active[i-4][j] = g.data.active[i][j]
+						} else {
+							g.data.active[i-4][j] = false
+						}
 					}
 				}
-				g.data.grid = newGrid
 
 				g.data.pacman.cellY -= 4
 				g.data.gridOffsetY -= CellSize * 4
@@ -167,7 +174,7 @@ func (g *Game) update(screen *ebiten.Image) error {
 					g.data.powers[i].cellY -= 4
 					if g.data.powers[i].cellY < 0 {
 						cellX := g.rand.Intn(Columns)
-						cellY := g.rand.Intn(4) + ((MazeViewSize / CellSize) - 4)
+						cellY := g.rand.Intn(4) + (numOfRows - 4)
 						g.data.powers[i] = NewPower(cellX, cellY, g.data.powers[i].kind)
 					}
 				}
@@ -176,11 +183,11 @@ func (g *Game) update(screen *ebiten.Image) error {
 					g.data.ghosts[i].posY -= CellSize * 4
 					if g.data.ghosts[i].cellY < 0 {
 						cellX := g.rand.Intn(Columns)
-						cellY := g.rand.Intn(4) + ((MazeViewSize / CellSize) - 4)
+						cellY := g.rand.Intn(4) + (numOfRows - 4)
 						g.data.ghosts[i] = NewGhost(
 							cellX, cellY,
 							g.data.ghosts[i].kind,
-							getExit(g.data.grid[cellY][cellX].walls))
+							getExit(g.data.grid[cellY][cellX]))
 					}
 				}
 			}
@@ -188,11 +195,28 @@ func (g *Game) update(screen *ebiten.Image) error {
 			g.keybord()
 			g.movePacman()
 
+			if !g.data.active[g.data.pacman.cellY][g.data.pacman.cellX] {
+				if math.Abs(float64(
+					(g.data.pacman.cellX*CellSize)+(CellSize/2),
+				)-(g.data.pacman.posX)) < 20 &&
+					math.Abs(float64(
+						(g.data.pacman.cellY*CellSize)+(CellSize/2),
+					)-(g.data.pacman.posY+g.data.gridOffsetY)) < 20 {
+					g.data.active[g.data.pacman.cellY][g.data.pacman.cellX] = true
+					g.data.score += 1
+					if g.audio.players.Chomp.IsPlaying() {
+						g.audio.players.Chomp.Pause()
+					}
+					g.audio.players.Chomp.Rewind()
+					g.audio.players.Chomp.Play()
+				}
+			}
+
 			// check powers
 			for i := 0; i < len(g.data.powers); i++ {
 				cellX := g.rand.Intn(Columns)
 				cellY := g.rand.Intn(4) +
-					(((g.data.powers[i].cellY / 4) * 4) + (MazeViewSize / CellSize))
+					(((g.data.powers[i].cellY / 4) * 4) + numOfRows)
 				if g.pacmanTouchesPower(i) {
 					switch g.data.powers[i].kind {
 					case Life:
@@ -231,7 +255,7 @@ func (g *Game) update(screen *ebiten.Image) error {
 					}
 					cellX := g.rand.Intn(Columns)
 					cellY := g.rand.Intn(4) +
-						(((g.data.ghosts[i].cellY / 4) * 4) + (MazeViewSize / CellSize))
+						(((g.data.ghosts[i].cellY / 4) * 4) + numOfRows)
 					g.data.ghosts[i] = NewGhost(
 						cellX, cellY, g.data.ghosts[i].kind, North)
 				}
@@ -294,7 +318,7 @@ func (g *Game) Run() error {
 
 func (g *Game) keybord() {
 	if g.data != nil {
-		walls := g.data.grid[g.data.pacman.cellY][g.data.pacman.cellX].walls
+		walls := g.data.grid[g.data.pacman.cellY][g.data.pacman.cellX]
 		if upKeyPressed() {
 			if walls[0] == '_' {
 				g.direction = North
@@ -337,23 +361,6 @@ func (g *Game) movePacman() {
 	xcell := g.data.pacman.cellX
 	ycell := g.data.pacman.cellY
 
-	if !g.data.grid[ycell][xcell].active {
-		if math.Abs(float64(
-			(g.data.pacman.cellX*CellSize)+(CellSize/2),
-		)-(g.data.pacman.posX)) < 20 &&
-			math.Abs(float64(
-				(g.data.pacman.cellY*CellSize)+(CellSize/2),
-			)-(g.data.pacman.posY+g.data.gridOffsetY)) < 20 {
-			g.data.grid[ycell][xcell].active = true
-			g.data.score += 1
-			if g.audio.players.Chomp.IsPlaying() {
-				g.audio.players.Chomp.Pause()
-			}
-			g.audio.players.Chomp.Rewind()
-			g.audio.players.Chomp.Play()
-		}
-	}
-
 	switch g.direction {
 	case North, South:
 		if g.data.pacman.posX == float64((CellSize*xcell)+(CellSize/2)) {
@@ -373,7 +380,7 @@ func (g *Game) movePacman() {
 			g.data.pacman.posY+g.data.gridOffsetY+speed,
 			g.data.pacman.cellX,
 			g.data.pacman.cellY,
-			g.data.grid[ycell][xcell].walls,
+			g.data.grid[ycell][xcell],
 		) {
 			if g.data.pacman.posY > OffsetY {
 				g.data.gridOffsetY += speed
@@ -391,7 +398,7 @@ func (g *Game) movePacman() {
 			g.data.pacman.posY+g.data.gridOffsetY-speed,
 			g.data.pacman.cellX,
 			g.data.pacman.cellY,
-			g.data.grid[ycell][xcell].walls,
+			g.data.grid[ycell][xcell],
 		) {
 			if g.data.pacman.posY > OffsetY && g.data.gridOffsetY > 0 {
 				g.data.gridOffsetY -= speed
@@ -409,7 +416,7 @@ func (g *Game) movePacman() {
 			g.data.pacman.posY+g.data.gridOffsetY,
 			g.data.pacman.cellX,
 			g.data.pacman.cellY,
-			g.data.grid[ycell][xcell].walls,
+			g.data.grid[ycell][xcell],
 		) {
 			g.data.pacman.posX += speed
 			if g.data.pacman.posX+20 > float64((xcell*CellSize)+CellSize) {
@@ -423,7 +430,7 @@ func (g *Game) movePacman() {
 			g.data.pacman.posY+g.data.gridOffsetY,
 			g.data.pacman.cellX,
 			g.data.pacman.cellY,
-			g.data.grid[ycell][xcell].walls,
+			g.data.grid[ycell][xcell],
 		) {
 			g.data.pacman.posX -= speed
 			if g.data.pacman.posX-20 < float64(xcell*CellSize) {
@@ -454,7 +461,7 @@ func (g *Game) getGhostDirection(i int) direction {
 	}
 
 	for j := range g.rand.Perm(4) {
-		if g.data.grid[ghost.cellY][ghost.cellX].walls[j] == '_' {
+		if g.data.grid[ghost.cellY][ghost.cellX][j] == '_' {
 			nx, ny := 0, 0
 			dist := 0.0
 			switch j {
@@ -501,16 +508,16 @@ func (g *Game) moveGhost(i int) {
 		return
 	}
 
-	if isIntersection(g.data.grid[ghost.cellY][ghost.cellX].walls) {
+	if isIntersection(g.data.grid[ghost.cellY][ghost.cellX]) {
 		if ghost.posX == float64((CellSize*ghost.cellX)+(CellSize/2)) &&
 			ghost.posY == float64((CellSize*ghost.cellY)+(CellSize/2)) {
 			g.data.ghosts[i].direction = g.getGhostDirection(i)
 		}
-	} else if isBlocked(g.data.grid[ghost.cellY][ghost.cellX].walls, ghost.direction) ||
-		isDeadend(g.data.grid[ghost.cellY][ghost.cellX].walls) {
+	} else if isBlocked(g.data.grid[ghost.cellY][ghost.cellX], ghost.direction) ||
+		isDeadend(g.data.grid[ghost.cellY][ghost.cellX]) {
 		if ghost.posX == float64((CellSize*ghost.cellX)+(CellSize/2)) &&
 			ghost.posY == float64((CellSize*ghost.cellY)+(CellSize/2)) {
-			g.data.ghosts[i].direction = getExit(g.data.grid[ghost.cellY][ghost.cellX].walls)
+			g.data.ghosts[i].direction = getExit(g.data.grid[ghost.cellY][ghost.cellX])
 		}
 	}
 
@@ -522,7 +529,7 @@ func (g *Game) moveGhost(i int) {
 			g.data.ghosts[i].posY+speed,
 			g.data.ghosts[i].cellX,
 			g.data.ghosts[i].cellY,
-			g.data.grid[g.data.ghosts[i].cellY][g.data.ghosts[i].cellX].walls,
+			g.data.grid[g.data.ghosts[i].cellY][g.data.ghosts[i].cellX],
 		) {
 			g.data.ghosts[i].posY += speed
 			if g.data.ghosts[i].posY+20 > float64((g.data.ghosts[i].cellY*CellSize)+CellSize) {
@@ -536,7 +543,7 @@ func (g *Game) moveGhost(i int) {
 			g.data.ghosts[i].posY-speed,
 			g.data.ghosts[i].cellX,
 			g.data.ghosts[i].cellY,
-			g.data.grid[g.data.ghosts[i].cellY][g.data.ghosts[i].cellX].walls,
+			g.data.grid[g.data.ghosts[i].cellY][g.data.ghosts[i].cellX],
 		) {
 			g.data.ghosts[i].posY -= speed
 			if g.data.ghosts[i].posY-20 < float64((g.data.ghosts[i].cellY * CellSize)) {
@@ -550,7 +557,7 @@ func (g *Game) moveGhost(i int) {
 			g.data.ghosts[i].posY,
 			g.data.ghosts[i].cellX,
 			g.data.ghosts[i].cellY,
-			g.data.grid[ghost.cellY][ghost.cellX].walls,
+			g.data.grid[ghost.cellY][ghost.cellX],
 		) {
 			g.data.ghosts[i].posX += speed
 			if g.data.ghosts[i].posX+20 > float64((g.data.ghosts[i].cellX*CellSize)+CellSize) {
@@ -564,7 +571,7 @@ func (g *Game) moveGhost(i int) {
 			g.data.ghosts[i].posY,
 			g.data.ghosts[i].cellX,
 			g.data.ghosts[i].cellY,
-			g.data.grid[g.data.ghosts[i].cellY][g.data.ghosts[i].cellX].walls,
+			g.data.grid[g.data.ghosts[i].cellY][g.data.ghosts[i].cellX],
 		) {
 			g.data.ghosts[i].posX -= speed
 			if g.data.ghosts[i].posX-20 < float64(g.data.ghosts[i].cellX*CellSize) {
