@@ -7,12 +7,12 @@ import (
 
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/audio"
-	"github.com/hajimehoshi/ebiten/audio/mp3"
 	"github.com/skatiyar/pacman/assets/fonts"
 	"github.com/skatiyar/pacman/assets/images"
-	"github.com/skatiyar/pacman/assets/sounds"
 	"github.com/skatiyar/pacman/spritetools"
+	// "github.com/hajimehoshi/ebiten/audio"
+	// "github.com/hajimehoshi/ebiten/audio/mp3"
+	// "github.com/skatiyar/pacman/assets/sounds"
 )
 
 type Characters struct {
@@ -209,6 +209,7 @@ func loadWalls() (*Walls, error) {
 	}, nil
 }
 
+/*
 type Sounds struct {
 	Beginning *mp3.Stream
 	Chomp     *mp3.Stream
@@ -217,9 +218,11 @@ type Sounds struct {
 	EatGhost  *mp3.Stream
 	ExtraPac  *mp3.Stream
 }
+*/
 
 // LoadSounds returns a struct with wav files decoded
 // for the provided audio context.
+/*
 func LoadSounds(ctx *audio.Context) (*Sounds, error) {
 	beginning, beginningErr := mp3.Decode(ctx, audio.BytesReadSeekCloser(sounds.BeginningMp3))
 	if beginningErr != nil {
@@ -260,3 +263,4 @@ func LoadSounds(ctx *audio.Context) (*Sounds, error) {
 		ExtraPac:  extraPac,
 	}, nil
 }
+*/
