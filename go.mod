@@ -9,7 +9,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/testify v1.2.2
 	golang.org/x/exp v0.0.0-20181106170214-d68db9428509 // indirect
-	golang.org/x/image v0.0.0-20190118043309-183bebdce1b2
+	golang.org/x/image v0.5.0
 )
 
 go 1.13
